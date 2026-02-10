@@ -155,23 +155,35 @@
     setTimeout(() => {
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Use selected voice if available
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-      } else {
-        // Try to get voice on-the-fly
-        const voices = speechSynthesis.getVoices();
-        const goodVoice = voices.find(v => 
-          v.name === 'Samantha' || 
-          v.name === 'Alex' || 
-          v.name === 'Ava'
-        );
-        if (goodVoice) utterance.voice = goodVoice;
+      // FORCE RELOAD VOICES AND SELECT BEST ONE
+      const voices = speechSynthesis.getVoices();
+      console.log('🎤 Available voices:', voices.map(v => v.name));
+      
+      // Try multiple Mac voices in order of quality
+      let bestVoice = null;
+      const preferredNames = ['Samantha', 'Alex', 'Ava', 'Allison', 'Tom', 'Susan', 'Karen', 'Daniel'];
+      
+      for (const name of preferredNames) {
+        bestVoice = voices.find(v => v.name === name);
+        if (bestVoice) {
+          console.log('✅ Using voice:', bestVoice.name);
+          break;
+        }
+      }
+      
+      // If still no voice, try any en-US voice
+      if (!bestVoice) {
+        bestVoice = voices.find(v => v.lang === 'en-US' || v.lang === 'en_US');
+        console.log('⚠️ Using fallback voice:', bestVoice?.name);
+      }
+      
+      if (bestVoice) {
+        utterance.voice = bestVoice;
       }
       
       // Optimized settings for Mac
       utterance.lang = "en-US";
-      utterance.rate = 1.1;      // Slightly faster for natural speech
+      utterance.rate = 1.05;     // Slightly faster for natural speech  
       utterance.pitch = 1.0;     // Normal pitch
       utterance.volume = 1.0;    // Full volume
 
