@@ -1,4 +1,4 @@
-// Luma Voice Assistant — Content Script (IMPROVED VOICE)
+// Luma Voice Assistant — Content Script (MAC OPTIMIZED)
 // Accessibility-first voice assistant for blind and visually impaired users
 
 (function () {
@@ -33,96 +33,69 @@
 
   let wakeRecognizer, commandRecognizer;
 
-  // --- Voice Selection (IMPROVED) ---
+  // --- Voice Selection (MAC OPTIMIZED) ---
   function selectBestVoice() {
     const voices = speechSynthesis.getVoices();
     
     if (voices.length === 0) {
-      // Voices not loaded yet, will retry
       return null;
     }
 
-    // Priority order for high-quality voices
-    const preferredVoices = [
-      // Google voices (high quality)
-      'Google US English',
-      'Google UK English Female',
-      'Google UK English Male',
-      
-      // Microsoft voices (high quality)
-      'Microsoft Zira Desktop',
-      'Microsoft David Desktop',
-      'Microsoft Mark',
-      'Microsoft Aria Online (Natural)',
-      'Microsoft Jenny Online (Natural)',
-      
-      // Apple voices (high quality on Mac/iOS)
-      'Samantha',
-      'Alex',
-      'Karen',
-      'Moira',
-      'Tessa',
-      
-      // Other quality voices
-      'Fiona',
-      'Daniel'
+    console.log('Available voices:', voices.map(v => v.name));
+
+    // Mac has excellent built-in voices - prioritize them
+    const macPreferredVoices = [
+      'Samantha',           // Best female voice on Mac
+      'Alex',               // Best male voice on Mac
+      'Ava',                // Premium female
+      'Allison',            // Enhanced female
+      'Susan',              // Enhanced female
+      'Tom',                // Enhanced male
+      'Karen',              // Australian English
+      'Daniel',             // British English
+      'Moira',              // Irish English
+      'Fiona',              // Scottish English
+      'Tessa',              // South African
+      'Victoria',           // Premium female
+      'Samantha (Enhanced)' // If available
     ];
 
-    // First, try to find a preferred voice by exact name
-    for (const preferred of preferredVoices) {
+    // First, try to find Mac's premium voices
+    for (const preferred of macPreferredVoices) {
       const voice = voices.find(v => v.name === preferred);
       if (voice) {
-        console.log('Luma: Selected voice:', voice.name);
+        console.log('✅ Selected Mac voice:', voice.name);
         return voice;
       }
     }
 
-    // Second, look for English voices with 'natural' or 'premium' in the name
-    const naturalVoice = voices.find(v => 
+    // Fallback to any enhanced or premium voice
+    const enhancedVoice = voices.find(v => 
       v.lang.startsWith('en') && 
-      (v.name.toLowerCase().includes('natural') || 
-       v.name.toLowerCase().includes('premium') ||
-       v.name.toLowerCase().includes('enhanced'))
+      (v.name.toLowerCase().includes('enhanced') || 
+       v.name.toLowerCase().includes('premium'))
     );
-    if (naturalVoice) {
-      console.log('Luma: Selected natural voice:', naturalVoice.name);
-      return naturalVoice;
-    }
-
-    // Third, prefer Google or Microsoft voices
-    const qualityVoice = voices.find(v => 
-      v.lang.startsWith('en') && 
-      (v.name.includes('Google') || v.name.includes('Microsoft'))
-    );
-    if (qualityVoice) {
-      console.log('Luma: Selected quality voice:', qualityVoice.name);
-      return qualityVoice;
-    }
-
-    // Fourth, get any local (non-remote) English voice
-    const localVoice = voices.find(v => v.lang.startsWith('en') && v.localService);
-    if (localVoice) {
-      console.log('Luma: Selected local voice:', localVoice.name);
-      return localVoice;
+    if (enhancedVoice) {
+      console.log('✅ Selected enhanced voice:', enhancedVoice.name);
+      return enhancedVoice;
     }
 
     // Last resort: first English voice
-    const fallbackVoice = voices.find(v => v.lang.startsWith('en'));
-    console.log('Luma: Selected fallback voice:', fallbackVoice?.name || 'default');
-    return fallbackVoice;
+    const fallback = voices.find(v => v.lang.startsWith('en'));
+    console.log('⚠️ Using fallback voice:', fallback?.name || 'default');
+    return fallback;
   }
 
-  // Initialize voices when they're loaded
+  // Initialize voices when available
   function initializeVoices() {
     selectedVoice = selectBestVoice();
     
     if (!selectedVoice) {
-      // Voices might not be loaded yet, wait for voiceschanged event
       speechSynthesis.addEventListener('voiceschanged', () => {
         if (!selectedVoice) {
           selectedVoice = selectBestVoice();
         }
-      });
+      }, { once: true });
     }
   }
 
@@ -172,41 +145,53 @@
     if (textEl) textEl.textContent = text;
   }
 
-  // --- Speech Output (IMPROVED) ---
+  // --- Speech Output (MAC OPTIMIZED) ---
   function speak(text, callback) {
     isSpeaking = true;
     updateStatus(text.substring(0, 60) + (text.length > 60 ? "..." : ""), "🔊");
     speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Use selected high-quality voice
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-    
-    // Improved speech parameters for clarity
-    utterance.lang = "en-US";
-    utterance.rate = 1.0;      // Normal speed (was 0.95)
-    utterance.pitch = 1.0;     // Normal pitch
-    utterance.volume = 1.0;    // Full volume
+    // Small delay to ensure cancel completes
+    setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Use selected voice if available
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      } else {
+        // Try to get voice on-the-fly
+        const voices = speechSynthesis.getVoices();
+        const goodVoice = voices.find(v => 
+          v.name === 'Samantha' || 
+          v.name === 'Alex' || 
+          v.name === 'Ava'
+        );
+        if (goodVoice) utterance.voice = goodVoice;
+      }
+      
+      // Optimized settings for Mac
+      utterance.lang = "en-US";
+      utterance.rate = 1.1;      // Slightly faster for natural speech
+      utterance.pitch = 1.0;     // Normal pitch
+      utterance.volume = 1.0;    // Full volume
 
-    utterance.onend = () => {
-      isSpeaking = false;
-      updateStatus(
-        isAwake ? "Listening for command..." : "Say 'Hey Luma' to wake me",
-        isAwake ? "🎤" : "😴"
-      );
-      if (callback) callback();
-    };
+      utterance.onend = () => {
+        isSpeaking = false;
+        updateStatus(
+          isAwake ? "Listening for command..." : "Say 'Hey Luma' to wake me",
+          isAwake ? "🎤" : "😴"
+        );
+        if (callback) callback();
+      };
 
-    utterance.onerror = (e) => {
-      console.error('Speech error:', e);
-      isSpeaking = false;
-      if (callback) callback();
-    };
+      utterance.onerror = (e) => {
+        console.error('Speech error:', e);
+        isSpeaking = false;
+        if (callback) callback();
+      };
 
-    speechSynthesis.speak(utterance);
+      speechSynthesis.speak(utterance);
+    }, 100);
   }
 
   function stopSpeaking() {
@@ -1003,8 +988,15 @@
     statusBar = createStatusBar();
     updateStatus("Requesting microphone access...", "🔄");
 
-    // Initialize voice selection
+    // Initialize voice selection for Mac
     initializeVoices();
+    
+    // Also try to load voices immediately
+    setTimeout(() => {
+      if (!selectedVoice) {
+        selectedVoice = selectBestVoice();
+      }
+    }, 500);
 
     navigator.mediaDevices
       .getUserMedia({ audio: true })
