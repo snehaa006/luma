@@ -179,9 +179,10 @@
     }
     .config-inputs {
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      grid-template-columns: auto;
       gap: 15px;
       align-items: end;
+      justify-content: center;
     }
     .input-group {
       display: flex;
@@ -713,25 +714,9 @@
       <div class="config-section">
         <h2>ThingSpeak Configuration</h2>
         <div class="config-inputs">
-          <div class="input-group">
-            <label>Channel ID:</label>
-            <input type="text" id="channelId" placeholder="Enter your Channel ID">
-          </div>
-          <div class="input-group">
-            <label>Read API Key (leave empty if public):</label>
-            <input type="text" id="apiKey" placeholder="Enter Read API Key or leave empty">
-          </div>
           <button class="dash-btn" onclick="startMonitoring()">Start Monitoring</button>
         </div>
         <div id="status" class="status-msg"></div>
-
-        <div id="apiConfig" class="input-group">
-          <label>Gemini API Key (for Environmental Scan):</label>
-          <div style="display: flex; gap: 10px; margin-top: 6px;">
-            <input type="password" id="geminiApiKey" placeholder="Enter Gemini API Key" style="flex: 1;">
-            <button class="dash-btn" onclick="saveApiKey()">Save Key</button>
-          </div>
-        </div>
       </div>
 
       <div class="cards-grid">
@@ -1048,9 +1033,12 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // --- Dashboard Logic (from index.html, unchanged functionality) ---
-    let channelId = '';
-    let apiKeyVal = '';
+    // --- Dashboard Logic ---
+    // HARDCODED CREDENTIALS
+    let channelId = '3189837';
+    let apiKeyVal = 'UV95Z7DVWGRB97IT';
+    let geminiApiKey = 'AIzaSyCuMjTq7esEekqjp5MnQGCerlgcSVdLzQA';
+    
     let updateInterval = null;
     let isMonitoring = false;
     const maxDataPoints = 50;
@@ -1061,24 +1049,10 @@
     let currentLat = null;
     let currentLon = null;
     let lastButtonState = null;
-    let geminiApiKey = localStorage.getItem('geminiApiKey') || '';
     let currentFacingMode = 'environment';
     let currentStream = null;
 
-    if (geminiApiKey) {
-      document.getElementById('geminiApiKey').value = geminiApiKey;
-    }
-
-    function saveApiKey() {
-      const key = document.getElementById('geminiApiKey').value.trim();
-      if (key) {
-        localStorage.setItem('geminiApiKey', key);
-        geminiApiKey = key;
-        alert('API Key saved locally!');
-      }
-    }
-
-    // Camera
+    // Camera functions
     async function initCamera() {
       try {
         if (currentStream) {
@@ -1113,7 +1087,7 @@
 
     async function captureAndScan() {
       if (!geminiApiKey) {
-        alert("Please enter a Gemini API Key in the configuration section.");
+        alert("Gemini API Key is missing.");
         return;
       }
       const video = document.getElementById('cameraPreview');
@@ -1196,9 +1170,6 @@
     }
 
     function startMonitoring() {
-      channelId = document.getElementById('channelId').value.trim();
-      apiKeyVal = document.getElementById('apiKey').value.trim();
-      if (!channelId) { showStatus('Please enter a Channel ID', true); return; }
       if (isMonitoring) clearInterval(updateInterval);
       showStatus('Starting monitoring...', false);
       isMonitoring = true;
