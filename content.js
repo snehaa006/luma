@@ -1,4 +1,4 @@
-// Luma Voice Assistant — Content Script
+// Luma Voice Assistant — Content Script (IMPROVED VOICE)
 // Accessibility-first voice assistant for blind and visually impaired users
 
 (function () {
@@ -11,10 +11,11 @@
   let hasAnnouncedReady = false;
   let consecutiveFailures = 0;
   let awakeTimeout = null;
-  const AWAKE_DURATION = 30000; // Stay awake for 30s after each command
+  const AWAKE_DURATION = 30000;
   let headingIndex = -1;
   let linkIndex = -1;
   let isSpeaking = false;
+  let selectedVoice = null;
 
   // --- Wake Phrases ---
   const wakePhrases = [
@@ -31,6 +32,99 @@
   ];
 
   let wakeRecognizer, commandRecognizer;
+
+  // --- Voice Selection (IMPROVED) ---
+  function selectBestVoice() {
+    const voices = speechSynthesis.getVoices();
+    
+    if (voices.length === 0) {
+      // Voices not loaded yet, will retry
+      return null;
+    }
+
+    // Priority order for high-quality voices
+    const preferredVoices = [
+      // Google voices (high quality)
+      'Google US English',
+      'Google UK English Female',
+      'Google UK English Male',
+      
+      // Microsoft voices (high quality)
+      'Microsoft Zira Desktop',
+      'Microsoft David Desktop',
+      'Microsoft Mark',
+      'Microsoft Aria Online (Natural)',
+      'Microsoft Jenny Online (Natural)',
+      
+      // Apple voices (high quality on Mac/iOS)
+      'Samantha',
+      'Alex',
+      'Karen',
+      'Moira',
+      'Tessa',
+      
+      // Other quality voices
+      'Fiona',
+      'Daniel'
+    ];
+
+    // First, try to find a preferred voice by exact name
+    for (const preferred of preferredVoices) {
+      const voice = voices.find(v => v.name === preferred);
+      if (voice) {
+        console.log('Luma: Selected voice:', voice.name);
+        return voice;
+      }
+    }
+
+    // Second, look for English voices with 'natural' or 'premium' in the name
+    const naturalVoice = voices.find(v => 
+      v.lang.startsWith('en') && 
+      (v.name.toLowerCase().includes('natural') || 
+       v.name.toLowerCase().includes('premium') ||
+       v.name.toLowerCase().includes('enhanced'))
+    );
+    if (naturalVoice) {
+      console.log('Luma: Selected natural voice:', naturalVoice.name);
+      return naturalVoice;
+    }
+
+    // Third, prefer Google or Microsoft voices
+    const qualityVoice = voices.find(v => 
+      v.lang.startsWith('en') && 
+      (v.name.includes('Google') || v.name.includes('Microsoft'))
+    );
+    if (qualityVoice) {
+      console.log('Luma: Selected quality voice:', qualityVoice.name);
+      return qualityVoice;
+    }
+
+    // Fourth, get any local (non-remote) English voice
+    const localVoice = voices.find(v => v.lang.startsWith('en') && v.localService);
+    if (localVoice) {
+      console.log('Luma: Selected local voice:', localVoice.name);
+      return localVoice;
+    }
+
+    // Last resort: first English voice
+    const fallbackVoice = voices.find(v => v.lang.startsWith('en'));
+    console.log('Luma: Selected fallback voice:', fallbackVoice?.name || 'default');
+    return fallbackVoice;
+  }
+
+  // Initialize voices when they're loaded
+  function initializeVoices() {
+    selectedVoice = selectBestVoice();
+    
+    if (!selectedVoice) {
+      // Voices might not be loaded yet, wait for voiceschanged event
+      speechSynthesis.addEventListener('voiceschanged', () => {
+        if (!selectedVoice) {
+          selectedVoice = selectBestVoice();
+        }
+      });
+    }
+  }
 
   // --- Status Bar ---
   function createStatusBar() {
@@ -78,17 +172,24 @@
     if (textEl) textEl.textContent = text;
   }
 
-  // --- Speech Output ---
+  // --- Speech Output (IMPROVED) ---
   function speak(text, callback) {
     isSpeaking = true;
     updateStatus(text.substring(0, 60) + (text.length > 60 ? "..." : ""), "🔊");
     speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Use selected high-quality voice
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+    
+    // Improved speech parameters for clarity
     utterance.lang = "en-US";
-    utterance.rate = 0.95;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
+    utterance.rate = 1.0;      // Normal speed (was 0.95)
+    utterance.pitch = 1.0;     // Normal pitch
+    utterance.volume = 1.0;    // Full volume
 
     utterance.onend = () => {
       isSpeaking = false;
@@ -99,7 +200,8 @@
       if (callback) callback();
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (e) => {
+      console.error('Speech error:', e);
       isSpeaking = false;
       if (callback) callback();
     };
@@ -177,7 +279,6 @@
   }
 
   // --- Multi-Command Mode ---
-  // Stays awake for 30 seconds so blind users can chain commands without repeating the wake word
   function resetAwakeTimer() {
     clearTimeout(awakeTimeout);
     awakeTimeout = setTimeout(() => {
@@ -233,7 +334,6 @@
 
     recog.onend = () => {
       isListening = false;
-      // Stay awake and keep listening if still in awake mode
       if (isAwake) {
         setTimeout(() => {
           if (isAwake && !isListening) listenForCommand();
@@ -309,25 +409,21 @@
 
     // --- Page Reading Commands ---
 
-    // Read page content
     if (cmd.includes("read page") || cmd.includes("read this page") || cmd.includes("read content") || cmd.includes("read everything")) {
       readPageContent();
       return;
     }
 
-    // Read headings
     if (cmd.includes("read headings") || cmd.includes("list headings") || cmd.includes("headings")) {
       readHeadings();
       return;
     }
 
-    // Read links
     if (cmd.includes("read links") || cmd.includes("list links") || cmd.includes("show links")) {
       readLinks();
       return;
     }
 
-    // Read selected text
     if (cmd.includes("read selection") || cmd.includes("read selected")) {
       const selection = window.getSelection().toString().trim();
       if (selection) {
@@ -375,13 +471,11 @@
       return;
     }
 
-    // Play first video
     if (cmd.includes("play first video") || cmd.includes("play first")) {
       playFirstVideo();
       return;
     }
 
-    // Video views
     if (cmd.includes("views") && cmd.includes("first")) {
       getFirstVideoViews();
       return;
@@ -446,7 +540,6 @@
       return;
     }
 
-    // Volume controls
     if (cmd.includes("volume up") || cmd.includes("louder")) {
       adjustVolume(0.2);
       return;
@@ -512,17 +605,14 @@
       return;
     }
 
-    // Greeting
     if (cmd === "hello" || cmd === "hi" || cmd.includes("how are you")) {
       speak("Hello! I'm here to help. Say 'help' for a list of commands.");
       return;
     }
 
-    // Fallback
     speak("I didn't catch that. Say 'help' for available commands.");
   }
 
-  // --- Utility: Extract number from command (e.g., "skip 30 seconds" → 30) ---
   function extractNumber(text, defaultVal) {
     const match = text.match(/(\d+)/);
     return match ? parseInt(match[1], 10) : defaultVal;
@@ -530,7 +620,6 @@
 
   // --- Page Reading ---
   function readPageContent() {
-    // Try to find main content area
     const mainContent =
       document.querySelector("main") ||
       document.querySelector("article") ||
@@ -539,7 +628,6 @@
       document.querySelector(".content") ||
       document.body;
 
-    // Get visible text, skipping nav/header/footer/aside
     const skipTags = new Set(["NAV", "HEADER", "FOOTER", "ASIDE", "SCRIPT", "STYLE", "NOSCRIPT", "SVG"]);
     let text = "";
     const walker = document.createTreeWalker(mainContent, NodeFilter.SHOW_TEXT, {
@@ -555,7 +643,7 @@
     let node;
     while ((node = walker.nextNode())) {
       text += node.textContent.trim() + " ";
-      if (text.length > 3000) break; // Cap length for speech
+      if (text.length > 3000) break;
     }
 
     text = text.replace(/\s+/g, " ").trim();
@@ -605,7 +693,6 @@
     speak(text);
   }
 
-  // --- Heading Navigation ---
   function navigateHeadings(direction) {
     const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
     if (headings.length === 0) {
@@ -622,7 +709,6 @@
     speak(`Heading ${headingIndex + 1} of ${headings.length}. Level ${h.tagName.replace("H", "")}: ${h.textContent.trim()}`);
   }
 
-  // --- Link Navigation ---
   function navigateLinks(direction) {
     const links = Array.from(document.querySelectorAll("a[href]")).filter((a) => {
       const rect = a.getBoundingClientRect();
@@ -639,7 +725,6 @@
     const link = links[linkIndex];
     link.scrollIntoView({ behavior: "smooth", block: "center" });
     link.focus();
-    // Highlight
     link.style.outline = "3px solid #00ff88";
     link.style.outlineOffset = "2px";
     setTimeout(() => {
@@ -649,9 +734,7 @@
     speak(`Link ${linkIndex + 1} of ${links.length}: ${link.textContent.trim()}. Say 'click' to open it.`);
   }
 
-  // --- Click Element by Text ---
   function clickElementByText(target) {
-    // If user says "click" with no target and we have a focused link
     if (!target || target === "it" || target === "this") {
       const links = Array.from(document.querySelectorAll("a[href]")).filter(
         (a) => a.getBoundingClientRect().width > 0 && a.textContent.trim()
@@ -665,10 +748,8 @@
       return;
     }
 
-    // Search for clickable elements matching the text
     const clickables = document.querySelectorAll("a, button, [role='button'], [role='link'], input[type='submit'], input[type='button']");
     let bestMatch = null;
-    let bestScore = 0;
     for (const el of clickables) {
       const elText = (el.textContent || el.value || el.getAttribute("aria-label") || "").trim().toLowerCase();
       if (elText === target) {
@@ -677,7 +758,6 @@
       }
       if (elText.includes(target) && elText.length < (bestMatch ? bestMatch.textContent.length : Infinity)) {
         bestMatch = el;
-        bestScore = 1;
       }
     }
 
@@ -690,7 +770,6 @@
     }
   }
 
-  // --- YouTube Functions ---
   function performYouTubeSearch(query) {
     const searchInput =
       document.querySelector("input#search") ||
@@ -740,7 +819,6 @@
     }
   }
 
-  // --- Media Controls ---
   function playVideo() {
     const video = document.querySelector("video");
     if (video) {
@@ -809,7 +887,6 @@
     }
   }
 
-  // --- Page Summary ---
   function summarizePage() {
     const url = window.location.href;
     if (url.includes("youtube.com")) {
@@ -856,7 +933,6 @@
     }
   }
 
-  // --- Open Website ---
   function openWebsite(site) {
     const siteMap = {
       youtube: "https://www.youtube.com",
@@ -876,12 +952,10 @@
       speak("Opening " + key + ".");
       setTimeout(() => { window.location.href = siteMap[key]; }, 500);
     } else if (site.includes(".")) {
-      // Looks like a domain
       const url = site.startsWith("http") ? site : "https://" + site;
       speak("Opening " + site + ".");
       setTimeout(() => { window.location.href = url; }, 500);
     } else {
-      // Try as a Google search
       speak("Searching Google for " + site + ".");
       setTimeout(() => {
         window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(site);
@@ -889,7 +963,6 @@
     }
   }
 
-  // --- Keyboard Shortcut: Ctrl+Shift+S to toggle wake ---
   document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.shiftKey && e.key === "S") {
       e.preventDefault();
@@ -907,7 +980,6 @@
     }
   });
 
-  // --- Auto-Restart & Visibility ---
   setInterval(() => {
     if (!isListening && !isAwake && !isSpeaking && consecutiveFailures < 5) {
       listenForWakeWord();
@@ -930,6 +1002,9 @@
   function initialize() {
     statusBar = createStatusBar();
     updateStatus("Requesting microphone access...", "🔄");
+
+    // Initialize voice selection
+    initializeVoices();
 
     navigator.mediaDevices
       .getUserMedia({ audio: true })
