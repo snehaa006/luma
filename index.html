@@ -302,6 +302,20 @@
     .location-card .card-value { font-size: 1em; }
     .location-card .dash-btn { margin-top: 10px; padding: 8px 15px; font-size: 0.9em; }
 
+    /* Map embed inside location card */
+    .map-embed {
+      margin-top: 14px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .map-embed iframe {
+      display: block;
+      width: 100%;
+      height: 200px;
+      border: none;
+    }
+
     /* Camera Card */
     .camera-card {
       grid-column: span 2;
@@ -766,9 +780,19 @@
         <div class="card location-card">
           <div class="card-label">Location</div>
           <div class="card-value">
-            <div id="latitude">Lat: --</div>
-            <div id="longitude">Lon: --</div>
-            <button class="dash-btn" id="viewMapBtn" onclick="openMap()" disabled>📍 View on Map</button>
+            <div id="latitude">Lat: 28.4501</div>
+            <div id="longitude">Lon: 77.5840</div>
+            <button class="dash-btn" id="viewMapBtn" onclick="openMap()">📍 View on Map</button>
+          </div>
+          <!-- Hardcoded map: German Hangar, Bennett University -->
+          <div class="map-embed">
+            <iframe
+              title="German Hangar, Bennett University"
+              src="https://www.google.com/maps?q=German+Hangar,+Bennett+University,+Greater+Noida,+Uttar+Pradesh,+India&output=embed"
+              allowfullscreen
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
           </div>
         </div>
       </div>
@@ -1038,6 +1062,10 @@
     let channelId = '3189837';
     let apiKeyVal = 'UV95Z7DVWGRB97IT';
     let geminiApiKey = 'AIzaSyCuMjTq7esEekqjp5MnQGCerlgcSVdLzQA';
+
+    // Fixed location: German Hangar, Bennett University
+    const FIXED_LAT = 28.4501;
+    const FIXED_LON = 77.5840;
     
     let updateInterval = null;
     let isMonitoring = false;
@@ -1046,8 +1074,8 @@
       distance: [], rain: [], button: [], buzzer: [], servo: [],
       latitude: [], longitude: [], labels: []
     };
-    let currentLat = null;
-    let currentLon = null;
+    let currentLat = FIXED_LAT;
+    let currentLon = FIXED_LON;
     let lastButtonState = null;
     let currentFacingMode = 'environment';
     let currentStream = null;
@@ -1156,10 +1184,9 @@
       document.getElementById('emergencyAlert').style.display = 'none';
     }
 
+    // Always opens German Hangar, Bennett University on the map
     function openMap() {
-      if (currentLat && currentLon) {
-        window.open(`https://www.google.com/maps?q=${currentLat},${currentLon}`, '_blank');
-      }
+      window.open(`https://www.google.com/maps?q=German+Hangar,+Bennett+University,+Greater+Noida,+Uttar+Pradesh,+India`, '_blank');
     }
 
     function showStatus(message, isError) {
@@ -1251,13 +1278,9 @@
         servoIndicator.className = 'button-state';
       }
 
-      document.getElementById('latitude').textContent = `Lat: ${feed.field4 ? parseFloat(feed.field4).toFixed(7) : '--'}`;
-      document.getElementById('longitude').textContent = `Lon: ${feed.field5 ? parseFloat(feed.field5).toFixed(7) : '--'}`;
-      if (feed.field4 && feed.field5) {
-        currentLat = parseFloat(feed.field4);
-        currentLon = parseFloat(feed.field5);
-        document.getElementById('viewMapBtn').disabled = false;
-      }
+      // Location display is fixed to German Hangar, Bennett University
+      document.getElementById('latitude').textContent = `Lat: ${FIXED_LAT.toFixed(7)}`;
+      document.getElementById('longitude').textContent = `Lon: ${FIXED_LON.toFixed(7)}`;
     }
 
     function updateChartsWithMultipleFeeds(feeds) {
