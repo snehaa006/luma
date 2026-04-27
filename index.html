@@ -780,15 +780,15 @@
         <div class="card location-card">
           <div class="card-label">Location</div>
           <div class="card-value">
-            <div id="latitude">Lat: 28.4501</div>
-            <div id="longitude">Lon: 77.5840</div>
+            <div id="latitude">Lat: 28.6681</div>
+            <div id="longitude">Lon: 77.1133</div>
             <button class="dash-btn" id="viewMapBtn" onclick="openMap()">📍 View on Map</button>
           </div>
-          <!-- Hardcoded map: German Hangar, Bennett University -->
+          <!-- Map: IGDTUW ECE Block -->
           <div class="map-embed">
             <iframe
-              title="German Hangar, Bennett University"
-              src="https://www.google.com/maps?q=German+Hangar,+Bennett+University,+Greater+Noida,+Uttar+Pradesh,+India&output=embed"
+              title="ECE Block, IGDTUW, Delhi"
+              src="https://www.google.com/maps?q=ECE+Block,+Indira+Gandhi+Delhi+Technical+University+for+Women,+Kashmere+Gate,+Delhi,+India&output=embed"
               allowfullscreen
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade">
@@ -1063,9 +1063,9 @@
     let apiKeyVal = 'UV95Z7DVWGRB97IT';
     let geminiApiKey = 'AIzaSyCuMjTq7esEekqjp5MnQGCerlgcSVdLzQA';
 
-    // Fixed location: German Hangar, Bennett University
-    const FIXED_LAT = 28.4501;
-    const FIXED_LON = 77.5840;
+    // Fixed location: IGDTUW ECE Block, Kashmere Gate, Delhi
+    const FIXED_LAT = 28.6681;
+    const FIXED_LON = 77.1133;
     
     let updateInterval = null;
     let isMonitoring = false;
@@ -1184,9 +1184,9 @@
       document.getElementById('emergencyAlert').style.display = 'none';
     }
 
-    // Always opens German Hangar, Bennett University on the map
+    // Opens IGDTUW ECE Block on the map
     function openMap() {
-      window.open(`https://www.google.com/maps?q=German+Hangar,+Bennett+University,+Greater+Noida,+Uttar+Pradesh,+India`, '_blank');
+      window.open(`https://www.google.com/maps?q=ECE+Block,+Indira+Gandhi+Delhi+Technical+University+for+Women,+Kashmere+Gate,+Delhi,+India`, '_blank');
     }
 
     function showStatus(message, isError) {
@@ -1278,7 +1278,7 @@
         servoIndicator.className = 'button-state';
       }
 
-      // Location display is fixed to German Hangar, Bennett University
+      // Location display fixed to IGDTUW ECE Block
       document.getElementById('latitude').textContent = `Lat: ${FIXED_LAT.toFixed(7)}`;
       document.getElementById('longitude').textContent = `Lon: ${FIXED_LON.toFixed(7)}`;
     }
