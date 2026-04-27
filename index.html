@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Luma — Smart Accessibility Suite</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <!-- Paho MQTT Client Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -86,9 +85,77 @@
       border-color: rgba(0, 230, 118, 0.2);
     }
 
+    /* Settings button in nav */
+    .nav-settings-btn {
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-settings-btn:hover { color: var(--text); background: var(--surface-hover); }
+
     /* --- Tab Content --- */
     .tab-content { display: none; padding-top: 80px; }
     .tab-content.active { display: block; }
+
+    /* ==========================================
+       SETTINGS MODAL
+       ========================================== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 500;
+      backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid rgba(0,230,118,0.15);
+      border-radius: 20px;
+      padding: 32px;
+      width: min(480px, 92vw);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+    .modal-box h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; }
+    .modal-box .modal-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .modal-box label { font-size: 0.8rem; color: var(--text-secondary); }
+    .modal-box input[type="password"],
+    .modal-box input[type="text"] {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: 'SF Mono','Fira Code',monospace;
+      width: 100%;
+    }
+    .modal-box input:focus { outline: none; border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .modal-hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+    .key-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 6px;
+    }
+    .key-status.set { background: rgba(0,230,118,0.12); color: var(--accent); border: 1px solid rgba(0,230,118,0.2); }
+    .key-status.unset { background: rgba(255,152,0,0.12); color: #ff9800; border: 1px solid rgba(255,152,0,0.2); }
 
     /* ==========================================
        TAB 1: IoT DASHBOARD
@@ -251,30 +318,6 @@
     .mqtt-log .log-line { margin-bottom: 3px; }
     .mqtt-log .log-ts { color: var(--accent); }
 
-    /* Gemini key row */
-    .gemini-row {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .gemini-row label { font-size: 0.78em; color: var(--text-secondary); white-space: nowrap; }
-    .gemini-row input {
-      flex: 1;
-      min-width: 200px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      color: var(--text);
-      font-size: 0.85em;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-    }
-    .gemini-row input:focus { outline: none; border-color: var(--accent); }
-
     /* Source tag on cards */
     .source-tag {
       position: absolute;
@@ -299,18 +342,6 @@
     }
     .config-section h2 { margin-bottom: 16px; font-size: 1.2em; font-weight: 600; }
     .config-inputs { display: grid; grid-template-columns: auto; gap: 15px; align-items: end; justify-content: center; }
-    .input-group { display: flex; flex-direction: column; }
-    .input-group label { margin-bottom: 6px; font-size: 0.85em; color: var(--text-secondary); }
-    .input-group input {
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      font-size: 0.95em;
-    }
-    .input-group input::placeholder { color: rgba(255,255,255,0.3); }
-    .input-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
 
     .status-msg {
       text-align: center;
@@ -634,7 +665,6 @@
     footer a { color: var(--accent); text-decoration: none; }
 
     @media (max-width: 768px) {
-      .config-inputs { grid-template-columns: 1fr; }
       .charts-section { grid-template-columns: 1fr; }
       .camera-card { grid-column: span 1; }
       .dashboard-header h1 { font-size: 1.6em; }
@@ -654,12 +684,34 @@
   <nav>
     <div class="nav-inner">
       <a href="#" class="nav-brand" onclick="switchTab('dashboard'); return false;">Luma</a>
-      <div class="nav-tabs">
-        <button class="nav-tab active" id="tab-btn-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
-        <button class="nav-tab" id="tab-btn-extension" onclick="switchTab('extension')">Voice Extension</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="nav-tabs">
+          <button class="nav-tab active" id="tab-btn-dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+          <button class="nav-tab" id="tab-btn-extension" onclick="switchTab('extension')">Voice Extension</button>
+        </div>
+        <button class="nav-settings-btn" onclick="openSettings()" title="API Settings">
+          ⚙️ Settings
+        </button>
       </div>
     </div>
   </nav>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal" onclick="closeSettingsOnOverlay(event)">
+    <div class="modal-box">
+      <h2>⚙️ API Settings</h2>
+      <div class="modal-row">
+        <label>Gemini API Key <span style="color:#666;font-size:0.85em;">(for AI camera scan)</span></label>
+        <input type="password" id="geminiApiKeyInput" placeholder="AIza…">
+        <div id="keyStatusBadge" class="key-status unset">● Not set</div>
+        <div class="modal-hint">Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent);">aistudio.google.com/apikey</a></div>
+      </div>
+      <div class="modal-actions">
+        <button class="dash-btn" style="background:rgba(255,255,255,0.08);color:var(--text);border:1px solid var(--border);" onclick="closeSettings()">Cancel</button>
+        <button class="dash-btn" onclick="saveApiKey()">Save Key</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Emergency Alert -->
   <div id="emergencyAlert" class="emergency-alert">
@@ -706,11 +758,6 @@
         </div>
         <div id="mqttStatusBar" class="mqtt-status-bar"></div>
         <div id="mqttLog" class="mqtt-log"></div>
-        <div class="gemini-row">
-          <label>Gemini API Key</label>
-          <input type="password" id="geminiApiKey" placeholder="Optional — for AI camera scan">
-          <button class="dash-btn" onclick="saveApiKey()" style="background:rgba(255,255,255,0.08);color:var(--text);border:1px solid var(--border);">Save</button>
-        </div>
       </div>
 
       <!-- REST Fallback Panel -->
@@ -952,9 +999,6 @@
     <p style="margin-top:8px;">Built to make the world accessible for everyone.</p>
   </footer>
 
-  <!-- ==========================================
-       SCRIPTS
-       ========================================== -->
   <script>
     // ============================================================
     // TAB SWITCHING
@@ -968,14 +1012,50 @@
     }
 
     // ============================================================
+    // SETTINGS MODAL
+    // ============================================================
+    function openSettings() {
+      const modal = document.getElementById('settingsModal');
+      modal.classList.add('open');
+      // Populate field from memory (show masked placeholder if set)
+      document.getElementById('geminiApiKeyInput').value = geminiApiKey || '';
+      updateKeyBadge();
+    }
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('open');
+    }
+    function closeSettingsOnOverlay(e) {
+      if (e.target === document.getElementById('settingsModal')) closeSettings();
+    }
+    function updateKeyBadge() {
+      const badge = document.getElementById('keyStatusBadge');
+      if (geminiApiKey && geminiApiKey.length > 8) {
+        badge.className = 'key-status set';
+        badge.textContent = '● Key saved (' + geminiApiKey.slice(0,6) + '…' + geminiApiKey.slice(-4) + ')';
+      } else {
+        badge.className = 'key-status unset';
+        badge.textContent = '● Not set';
+      }
+    }
+    function saveApiKey() {
+      const k = document.getElementById('geminiApiKeyInput').value.trim();
+      if (k) {
+        localStorage.setItem('geminiApiKey', k);
+        geminiApiKey = k;
+        updateKeyBadge();
+        setMqttStatus('ok', 'Gemini API key saved successfully.');
+        setTimeout(closeSettings, 800);
+      }
+    }
+
+    // ============================================================
     // HARDCODED CREDENTIALS
     // ============================================================
-    const MQTT_CHANNEL   = '3189837';
-    const MQTT_USERNAME  = 'JgwMHQ4UFR04PRspJAMvDTs';
-    const MQTT_CLIENT_ID = 'JgwMHQ4UFR04PRspJAMvDTs';
-    const MQTT_PASSWORD  = 'QnphD4oJcgOuopRgunNa2lWg';
-    const REST_CHANNEL   = '3189837';
-    const REST_API_KEY   = 'UV95Z7DVWGRB97IT';
+    const MQTT_CHANNEL  = '3189837';
+    const MQTT_USERNAME = 'JgwMHQ4UFR04PRspJAMvDTs';
+    const MQTT_PASSWORD = 'QnphD4oJcgOuopRgunNa2lWg';
+    const REST_CHANNEL  = '3189837';
+    const REST_API_KEY  = 'UV95Z7DVWGRB97IT';
 
     // Fixed campus location
     const FIXED_LAT = 28.6681;
@@ -984,16 +1064,16 @@
     // ============================================================
     // STATE
     // ============================================================
-    let mqttClient     = null;
-    let mqttConnected  = false;
-    let isPolling      = false;
-    let pollingInterval = null;
-    let currentLat     = FIXED_LAT;
-    let currentLon     = FIXED_LON;
-    let lastButtonState = null;
+    let mqttClient       = null;
+    let mqttConnected    = false;
+    let isPolling        = false;
+    let pollingInterval  = null;
+    let currentLat       = FIXED_LAT;
+    let currentLon       = FIXED_LON;
+    let lastButtonState  = null;
     let currentFacingMode = 'environment';
-    let currentStream  = null;
-    let geminiApiKey   = localStorage.getItem('geminiApiKey') || 'AIzaSyCuMjTq7esEekqjp5MnQGCerlgcSVdLzQA';
+    let currentStream    = null;
+    let geminiApiKey     = localStorage.getItem('geminiApiKey') || '';
 
     const maxDataPoints = 50;
     const chartData = {
@@ -1001,22 +1081,36 @@
       latitude: [], longitude: [], labels: []
     };
 
-    if (geminiApiKey) document.getElementById('geminiApiKey').value = geminiApiKey;
+    // Refresh key badge on load
+    updateKeyBadge();
 
     // ============================================================
     // MQTT — CONNECT / DISCONNECT
+    // Fixed: unique clientId per session to avoid ThingSpeak collision
     // ============================================================
     function connectMQTT() {
-      setMqttStatus('info', 'Connecting to ThingSpeak MQTT broker...');
+      // Disable button immediately to prevent double-clicks
+      document.getElementById('mqttConnectBtn').disabled = true;
+      setMqttStatus('info', 'Connecting to ThingSpeak MQTT broker…');
       setBadge('mqttBadge', '');
 
-      mqttClient = new Paho.MQTT.Client('mqtt3.thingspeak.com', 8084, '/mqtt', MQTT_CLIENT_ID);
+      // ThingSpeak requires a unique clientId each connection
+      const uniqueClientId = MQTT_USERNAME + '_' + Math.random().toString(16).slice(2, 8);
+
+      try {
+        mqttClient = new Paho.MQTT.Client('mqtt3.thingspeak.com', 8084, '/mqtt', uniqueClientId);
+      } catch (e) {
+        setMqttStatus('err', 'MQTT client init failed: ' + e.message);
+        document.getElementById('mqttConnectBtn').disabled = false;
+        return;
+      }
 
       mqttClient.onConnectionLost = (resp) => {
         mqttConnected = false;
         setBadge('mqttBadge', 'conn-error');
-        setMqttStatus('err', 'Connection lost: ' + resp.errorMessage);
-        logMQTT('⚠ Connection lost: ' + resp.errorMessage);
+        const msg = resp.errorMessage || 'Unknown reason';
+        setMqttStatus('err', '⚠ Connection lost: ' + msg);
+        logMQTT('⚠ Connection lost: ' + msg);
         document.getElementById('mqttConnectBtn').disabled = false;
         document.getElementById('mqttDisconnectBtn').disabled = true;
       };
@@ -1029,42 +1123,59 @@
         useSSL: true,
         userName: MQTT_USERNAME,
         password: MQTT_PASSWORD,
-        timeout: 10,
+        timeout: 15,
         keepAliveInterval: 60,
-        onSuccess: () => {
-          mqttConnected = true;
-          setBadge('mqttBadge', 'mqtt-connected');
-          setMqttStatus('ok', `✓ Connected! Subscribing to channel ${MQTT_CHANNEL}…`);
-          logMQTT(`✓ Connected as ${MQTT_CLIENT_ID}`);
-          document.getElementById('mqttConnectBtn').disabled = true;
-          document.getElementById('mqttDisconnectBtn').disabled = false;
+        cleanSession: true,
+        reconnect: false,
+        onSuccess: onMQTTConnect,
+        onFailure: onMQTTFailure
+      });
+    }
 
-          const topic = `channels/${MQTT_CHANNEL}/subscribe/fields/+`;
-          mqttClient.subscribe(topic, {
-            qos: 0,
-            onSuccess: () => {
-              logMQTT(`📡 Subscribed: ${topic}`);
-              setMqttStatus('ok', `✓ Live! Receiving data from channel ${MQTT_CHANNEL}`);
-            },
-            onFailure: (err) => logMQTT('✗ Subscribe failed: ' + err.errorMessage)
-          });
+    function onMQTTConnect() {
+      mqttConnected = true;
+      setBadge('mqttBadge', 'mqtt-connected');
+      setMqttStatus('ok', `✓ Connected to ThingSpeak MQTT — subscribing to channel ${MQTT_CHANNEL}…`);
+      logMQTT(`✓ Connected to mqtt3.thingspeak.com`);
+      document.getElementById('mqttConnectBtn').disabled = true;
+      document.getElementById('mqttDisconnectBtn').disabled = false;
+
+      // Subscribe to all fields of the channel
+      const topic = `channels/${MQTT_CHANNEL}/subscribe/fields/+`;
+      mqttClient.subscribe(topic, {
+        qos: 0,
+        onSuccess: () => {
+          logMQTT(`📡 Subscribed: ${topic}`);
+          setMqttStatus('ok', `✓ Live! Streaming data from channel ${MQTT_CHANNEL}`);
         },
         onFailure: (err) => {
-          mqttConnected = false;
-          setBadge('mqttBadge', 'conn-error');
-          setMqttStatus('err', 'Connection failed: ' + err.errorMessage);
-          logMQTT('✗ Connect failed: ' + err.errorMessage);
+          logMQTT('✗ Subscribe failed: ' + (err.errorMessage || err));
+          setMqttStatus('err', 'Subscribe failed: ' + (err.errorMessage || 'unknown'));
         }
       });
     }
 
+    function onMQTTFailure(err) {
+      mqttConnected = false;
+      setBadge('mqttBadge', 'conn-error');
+      const msg = err.errorMessage || 'Connection refused';
+      setMqttStatus('err', '✗ MQTT failed: ' + msg + '. Try REST polling as fallback.');
+      logMQTT('✗ Connect failed: ' + msg);
+      document.getElementById('mqttConnectBtn').disabled = false;
+      document.getElementById('mqttDisconnectBtn').disabled = true;
+    }
+
     function disconnectMQTT() {
-      if (mqttClient && mqttConnected) {
-        mqttClient.disconnect();
-        mqttConnected = false;
+      if (mqttClient) {
+        try {
+          if (mqttConnected) mqttClient.disconnect();
+        } catch (e) { /* ignore */ }
+        mqttClient = null;
       }
+      mqttConnected = false;
       setBadge('mqttBadge', '');
       setMqttStatus('info', 'Disconnected from MQTT.');
+      logMQTT('■ Disconnected by user');
       document.getElementById('mqttConnectBtn').disabled = false;
       document.getElementById('mqttDisconnectBtn').disabled = true;
     }
@@ -1076,15 +1187,16 @@
     let mqttFlushTimer = null;
 
     function handleMQTTMessage(topic, payload) {
-      logMQTT(`← ${topic}: ${payload.trim()}`);
+      const val = payload.trim();
+      logMQTT(`← ${topic}: ${val}`);
 
-      // Extract field number: channels/<id>/subscribe/fields/field<N>
-      const match = topic.match(/fields\/field(\d+)/);
+      // Extract field number from: channels/<id>/subscribe/fields/field<N>
+      const match = topic.match(/\/fields\/field(\d+)$/);
       if (!match) return;
-      const fieldNum = parseInt(match[1]);
-      mqttFieldBuffer[`field${fieldNum}`] = payload.trim();
+      const fieldKey = 'field' + match[1];
+      mqttFieldBuffer[fieldKey] = val;
 
-      // Debounce so we assemble a complete set before updating UI
+      // Debounce — wait 200ms for burst to settle before updating UI
       clearTimeout(mqttFlushTimer);
       mqttFlushTimer = setTimeout(() => {
         const feed = { ...mqttFieldBuffer, created_at: new Date().toISOString() };
@@ -1097,7 +1209,7 @@
     // REST POLLING (FALLBACK)
     // ============================================================
     function startMonitoring() {
-      if (isPolling) clearInterval(pollingInterval);
+      if (isPolling) { clearInterval(pollingInterval); }
       isPolling = true;
       showStatus('Starting REST polling…', false);
       fetchREST();
@@ -1106,8 +1218,7 @@
 
     async function fetchREST() {
       try {
-        let url = `https://api.thingspeak.com/channels/${REST_CHANNEL}/feeds.json?results=20`;
-        if (REST_API_KEY) url += `&api_key=${REST_API_KEY}`;
+        const url = `https://api.thingspeak.com/channels/${REST_CHANNEL}/feeds.json?results=20&api_key=${REST_API_KEY}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
@@ -1116,7 +1227,7 @@
           updateDisplay(latest, 'ts');
           rebuildCharts(data.feeds);
           setBadge('tsBadge', 'ts-connected');
-          showStatus('REST data updated at ' + new Date().toLocaleTimeString(), false);
+          showStatus('REST updated at ' + new Date().toLocaleTimeString(), false);
         } else {
           showStatus('No data in channel yet', true);
         }
@@ -1130,15 +1241,14 @@
     // DISPLAY UPDATE (shared by MQTT + REST)
     // ============================================================
     function updateDisplay(feed, source) {
-      const srcClass = source; // 'mqtt' or 'ts'
+      const srcClass = source;
       const srcLabel = source === 'mqtt' ? 'MQTT' : 'REST';
 
       // Distance — field1
-      const dist = feed.field1 != null ? parseFloat(feed.field1).toFixed(1) : null;
-      if (dist !== null) {
+      if (feed.field1 != null && feed.field1 !== '') {
+        const dist = parseFloat(feed.field1).toFixed(1);
         document.getElementById('distance').textContent = dist;
         setSourceTag('srcDistance', srcLabel, srcClass);
-
         const scanBtn = document.getElementById('scanBtn');
         if (parseFloat(dist) < 20 && parseFloat(dist) > 0) {
           if (!scanBtn.classList.contains('highlight')) {
@@ -1151,13 +1261,13 @@
       }
 
       // Rain — field2
-      if (feed.field2 != null) {
+      if (feed.field2 != null && feed.field2 !== '') {
         document.getElementById('rain').textContent = parseInt(feed.field2);
         setSourceTag('srcRain', srcLabel, srcClass);
       }
 
       // Button — field3
-      if (feed.field3 != null) {
+      if (feed.field3 != null && feed.field3 !== '') {
         const st = parseInt(feed.field3);
         if (lastButtonState !== null && lastButtonState === 1 && st === 0) {
           document.getElementById('emergencyAlert').style.display = 'block';
@@ -1170,7 +1280,7 @@
       }
 
       // Buzzer — field6
-      if (feed.field6 != null) {
+      if (feed.field6 != null && feed.field6 !== '') {
         const st = parseInt(feed.field6);
         document.getElementById('buzzerText').textContent = st === 1 ? 'ON' : 'OFF';
         document.getElementById('buzzerIndicator').className = 'button-state ' + (st === 1 ? 'button-pressed' : 'button-not-pressed');
@@ -1178,57 +1288,53 @@
       }
 
       // Servo — field7
-      if (feed.field7 != null) {
+      if (feed.field7 != null && feed.field7 !== '') {
         const st = parseInt(feed.field7);
         document.getElementById('servoText').textContent = st === 1 ? 'ON' : 'OFF';
         document.getElementById('servoIndicator').className = 'button-state ' + (st === 1 ? 'button-pressed' : 'button-not-pressed');
         setSourceTag('srcServo', srcLabel, srcClass);
       }
 
-      // Location — field4/field5 (fall back to fixed coords if GPS not in feed)
-      const lat = feed.field4 ? parseFloat(feed.field4) : null;
-      const lon = feed.field5 ? parseFloat(feed.field5) : null;
-      if (lat != null && lon != null) {
+      // Location — field4/field5
+      const lat = (feed.field4 != null && feed.field4 !== '') ? parseFloat(feed.field4) : null;
+      const lon = (feed.field5 != null && feed.field5 !== '') ? parseFloat(feed.field5) : null;
+      if (lat != null && lon != null && !isNaN(lat) && !isNaN(lon)) {
         currentLat = lat; currentLon = lon;
         document.getElementById('latitude').textContent = `Lat: ${lat.toFixed(7)}`;
         document.getElementById('longitude').textContent = `Lon: ${lon.toFixed(7)}`;
         setSourceTag('srcLocation', srcLabel, srcClass);
       } else {
-        // Show fixed campus location when GPS data absent
         document.getElementById('latitude').textContent = `Lat: ${FIXED_LAT.toFixed(7)}`;
         document.getElementById('longitude').textContent = `Lon: ${FIXED_LON.toFixed(7)}`;
       }
     }
 
-    // Append a single point (MQTT live mode)
     function appendChartPoint(feed) {
       const ts = new Date(feed.created_at).toLocaleTimeString();
       chartData.labels.push(ts);
       chartData.distance.push(feed.field1 ? parseFloat(feed.field1) : null);
       chartData.rain.push(feed.field2 ? parseInt(feed.field2) : null);
-      chartData.button.push(feed.field3 != null ? parseInt(feed.field3) : null);
-      chartData.buzzer.push(feed.field6 != null ? parseInt(feed.field6) : null);
-      chartData.servo.push(feed.field7 != null ? parseInt(feed.field7) : null);
+      chartData.button.push(feed.field3 != null && feed.field3 !== '' ? parseInt(feed.field3) : null);
+      chartData.buzzer.push(feed.field6 != null && feed.field6 !== '' ? parseInt(feed.field6) : null);
+      chartData.servo.push(feed.field7 != null && feed.field7 !== '' ? parseInt(feed.field7) : null);
       chartData.latitude.push(feed.field4 ? parseFloat(feed.field4) : null);
       chartData.longitude.push(feed.field5 ? parseFloat(feed.field5) : null);
 
-      // Trim
       ['distance','rain','button','buzzer','servo','latitude','longitude','labels'].forEach(k => {
         if (chartData[k].length > maxDataPoints) chartData[k].shift();
       });
       allCharts.forEach(c => c.update('none'));
     }
 
-    // Full rebuild (REST polling mode — multiple feeds)
     function rebuildCharts(feeds) {
       ['distance','rain','button','buzzer','servo','latitude','longitude','labels'].forEach(k => chartData[k].length = 0);
       feeds.forEach(f => {
         chartData.labels.push(new Date(f.created_at).toLocaleTimeString());
         chartData.distance.push(f.field1 ? parseFloat(f.field1) : null);
         chartData.rain.push(f.field2 ? parseInt(f.field2) : null);
-        chartData.button.push(f.field3 != null ? parseInt(f.field3) : null);
-        chartData.buzzer.push(f.field6 != null ? parseInt(f.field6) : null);
-        chartData.servo.push(f.field7 != null ? parseInt(f.field7) : null);
+        chartData.button.push(f.field3 != null && f.field3 !== '' ? parseInt(f.field3) : null);
+        chartData.buzzer.push(f.field6 != null && f.field6 !== '' ? parseInt(f.field6) : null);
+        chartData.servo.push(f.field7 != null && f.field7 !== '' ? parseInt(f.field7) : null);
         chartData.latitude.push(f.field4 ? parseFloat(f.field4) : null);
         chartData.longitude.push(f.field5 ? parseFloat(f.field5) : null);
       });
@@ -1246,26 +1352,22 @@
       const el = document.getElementById(id);
       el.className = 'connection-badge' + (cls ? ' ' + cls : '');
     }
-
     function setMqttStatus(type, msg) {
       const el = document.getElementById('mqttStatusBar');
       el.className = 'mqtt-status-bar ' + type;
       el.textContent = msg;
     }
-
     function showStatus(message, isError) {
       const el = document.getElementById('status');
       el.textContent = message;
       el.className = 'status-msg ' + (isError ? 'error' : 'success');
     }
-
     function setSourceTag(id, label, cls) {
       const el = document.getElementById(id);
       el.textContent = label;
       el.className = 'source-tag ' + cls;
       el.style.display = '';
     }
-
     function logMQTT(msg) {
       const log = document.getElementById('mqttLog');
       log.style.display = 'block';
@@ -1276,28 +1378,20 @@
       log.insertBefore(line, log.firstChild);
       if (log.children.length > 30) log.removeChild(log.lastChild);
     }
-
     function dismissAlert() {
       document.getElementById('emergencyAlert').style.display = 'none';
     }
-
     function openMap() {
-      if (currentLat && currentLon) {
-        window.open(`https://www.google.com/maps?q=${currentLat},${currentLon}`, '_blank');
-      }
+      window.open(`https://www.google.com/maps?q=${currentLat},${currentLon}`, '_blank');
     }
-
-    function saveApiKey() {
-      const k = document.getElementById('geminiApiKey').value.trim();
-      if (k) { localStorage.setItem('geminiApiKey', k); geminiApiKey = k; setMqttStatus('ok', 'Gemini API key saved.'); }
-    }
-
     function dashSpeak(text) {
       if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
     }
 
     // ============================================================
-    // CAMERA + AI
+    // CAMERA + AI VISION
+    // Updated model list — current as of 2026. 1.5 models deprecated.
+    // Priority: gemini-2.5-flash → gemini-2.0-flash → gemini-2.5-flash-lite
     // ============================================================
     async function initCamera() {
       try {
@@ -1320,45 +1414,91 @@
     }
 
     async function captureAndScan() {
-      if (!geminiApiKey) { alert("Enter your Gemini API Key first."); return; }
+      if (!geminiApiKey) {
+        openSettings();
+        document.getElementById('aiResponse').textContent = '⚙️ Please enter your Gemini API key in Settings first.';
+        return;
+      }
+
       const video = document.getElementById('cameraPreview');
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0);
       const b64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
       const el = document.getElementById('aiResponse');
       el.textContent = "⌛ Analyzing environment…";
       dashSpeak("Scanning environment. Please wait.");
 
-      const models = ['gemini-2.0-flash','gemini-2.0-flash-001','gemini-2.5-flash','gemini-1.5-flash','gemini-1.5-flash-latest'];
-      let success = false, lastErr = '';
+      // Current valid multimodal models (as of April 2026)
+      const models = [
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-2.5-flash-lite'
+      ];
 
-      for (const m of models) {
+      const prompt = "Role: You are the 'Virtual Eyes' for LUMA, an advanced smart stick assistant.\nTask: Provide a highly descriptive situational awareness report of the path ahead.\nStructure: 1. Direct Path: Clear or Obstructed (name obstacle + clock position). 2. Surface: ground type + hazards. 3. Landmarks/Barriers: note entrances, stairs.\nKeep under 50 words. Complete sentences only. Help user walk safely.";
+
+      let success = false;
+      let lastErr = '';
+
+      for (const model of models) {
         try {
-          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${geminiApiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [
-                { text: "Role: You are the 'Virtual Eyes' for LUMA, an advanced smart stick assistant.\nTask: Provide a highly descriptive situational awareness report of the path ahead.\nStructure: 1. Direct Path: Clear or Obstructed (name obstacle + clock position). 2. Surface: ground type + hazards. 3. Landmarks/Barriers: note entrances, stairs.\nKeep under 50 words. Complete sentences only. Help user walk safely." },
-                { inlineData: { mimeType: "image/jpeg", data: b64 } }
-              ]}],
-              generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
-            })
-          });
-          const d = await r.json();
-          if (r.ok && d.candidates?.[0]) {
-            const txt = d.candidates[0].content.parts.map(p => p.text || '').join(' ').replace(/\*\*/g, '').trim();
-            if (txt) { el.textContent = txt; dashSpeak(txt); success = true; break; }
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: prompt },
+                    { inlineData: { mimeType: 'image/jpeg', data: b64 } }
+                  ]
+                }],
+                generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
+              })
+            }
+          );
+
+          const d = await res.json();
+
+          if (!res.ok) {
+            lastErr = d.error?.message || `HTTP ${res.status}`;
+            logMQTT(`✗ ${model}: ${lastErr}`);
+            continue;
           }
-          lastErr = d.error?.message || 'No content';
-        } catch (e) { lastErr = e.message; }
+
+          const txt = d.candidates?.[0]?.content?.parts
+            ?.map(p => p.text || '')
+            .join(' ')
+            .replace(/\*\*/g, '')
+            .trim();
+
+          if (txt) {
+            el.textContent = `[${model}] ${txt}`;
+            dashSpeak(txt);
+            logMQTT(`✓ Vision: ${model}`);
+            success = true;
+            break;
+          } else {
+            lastErr = 'Empty response from model';
+          }
+        } catch (e) {
+          lastErr = e.message;
+          logMQTT(`✗ ${model}: ${e.message}`);
+        }
       }
 
       if (!success) {
-        el.textContent = lastErr.includes('API key') ? '❌ Invalid API key.'
-          : lastErr.includes('quota') || lastErr.includes('429') ? '❌ Quota exceeded — wait 60s.'
-          : '❌ ' + lastErr;
+        if (lastErr.toLowerCase().includes('api key') || lastErr.toLowerCase().includes('invalid')) {
+          el.textContent = '❌ Invalid API key. Click ⚙️ Settings to update it.';
+        } else if (lastErr.includes('429') || lastErr.toLowerCase().includes('quota')) {
+          el.textContent = '❌ Quota exceeded — wait a moment and try again.';
+        } else {
+          el.textContent = '❌ Scan failed: ' + lastErr;
+        }
       }
     }
 
@@ -1397,32 +1537,26 @@
       type: 'line', options: baseChartOpts,
       data: { labels: chartData.labels, datasets: [mkDataset('Distance (cm)', chartData.distance, '#4CAF50')] }
     });
-
     const rainChart = new Chart(document.getElementById('rainChart'), {
       type: 'line', options: baseChartOpts,
       data: { labels: chartData.labels, datasets: [mkDataset('Rain', chartData.rain, '#2196F3')] }
     });
-
     const buttonChart = new Chart(document.getElementById('buttonChart'), {
       type: 'line', options: steppedOpts(v => v===0?'Pressed':v===1?'Not Pressed':''),
       data: { labels: chartData.labels, datasets: [mkDataset('Button', chartData.button, '#FF9800', { stepped: true })] }
     });
-
     const buzzerChart = new Chart(document.getElementById('buzzerChart'), {
       type: 'line', options: steppedOpts(v => v===0?'OFF':v===1?'ON':''),
       data: { labels: chartData.labels, datasets: [mkDataset('Buzzer', chartData.buzzer, '#E91E63', { stepped: true })] }
     });
-
     const servoChart = new Chart(document.getElementById('servoChart'), {
       type: 'line', options: steppedOpts(v => v===0?'OFF':v===1?'ON':''),
       data: { labels: chartData.labels, datasets: [mkDataset('Servo', chartData.servo, '#9C27B0', { stepped: true })] }
     });
-
     const latitudeChart = new Chart(document.getElementById('latitudeChart'), {
       type: 'line', options: coordOpts(),
       data: { labels: chartData.labels, datasets: [mkDataset('Lat', chartData.latitude, '#00BCD4', { pointRadius:3, pointHoverRadius:6, pointBackgroundColor:'#00BCD4', pointBorderColor:'#fff', pointBorderWidth:2 })] }
     });
-
     const longitudeChart = new Chart(document.getElementById('longitudeChart'), {
       type: 'line', options: coordOpts(),
       data: { labels: chartData.labels, datasets: [mkDataset('Lon', chartData.longitude, '#FF5722', { pointRadius:3, pointHoverRadius:6, pointBackgroundColor:'#FF5722', pointBorderColor:'#fff', pointBorderWidth:2 })] }
@@ -1434,9 +1568,8 @@
     // AUTO-CONNECT ON LOAD
     // ============================================================
     window.addEventListener('load', () => {
-      setTimeout(connectMQTT, 600);
+      setTimeout(connectMQTT, 800);
     });
   </script>
-
 </body>
 </html>
