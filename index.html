@@ -1087,29 +1087,38 @@
 
     // ============================================================
     // MQTT — CONNECT / DISCONNECT  (using mqtt.js v5, not Paho)
-    // Paho (mqttws31) is unmaintained and times out on ThingSpeak WSS.
-    // mqtt.js is the modern standard for browser MQTT over WebSocket.
+    // Tries port 8084 first, falls back to port 443 if connack times out.
+    // connack timeout = ThingSpeak sees the connection but rejects it,
+    // usually because the MQTT Device doesn't have Subscribe permission.
     // ============================================================
-    function connectMQTT() {
-      document.getElementById('mqttConnectBtn').disabled = true;
-      setMqttStatus('info', 'Connecting to ThingSpeak MQTT broker…');
-      setBadge('mqttBadge', '');
+    let mqttPortIndex = 0;
+    const MQTT_PORTS = [8084, 443];
 
-      // ThingSpeak requires a unique clientId per session
+    function connectMQTT(portIndex = 0) {
+      mqttPortIndex = portIndex;
+      document.getElementById('mqttConnectBtn').disabled = true;
+      document.getElementById('mqttDisconnectBtn').disabled = true;
+
+      const port = MQTT_PORTS[portIndex];
+      const brokerUrl = `wss://mqtt3.thingspeak.com:${port}/mqtt`;
       const clientId = MQTT_USERNAME + '_' + Math.random().toString(16).slice(2, 10);
 
-      // mqtt.js broker URL — WSS on port 8084, path /mqtt
-      const brokerUrl = 'wss://mqtt3.thingspeak.com:8084/mqtt';
+      setMqttStatus('info', `Connecting via WSS port ${port}…`);
+      setBadge('mqttBadge', '');
+      logMQTT(`▶ Trying ${brokerUrl} (clientId: ${clientId.slice(-8)})`);
+
+      // Clean up any previous client
+      if (mqttClient) { try { mqttClient.end(true); } catch(e){} mqttClient = null; }
 
       try {
         mqttClient = mqtt.connect(brokerUrl, {
           clientId,
           username: MQTT_USERNAME,
           password: MQTT_PASSWORD,
-          clean: true,          // ThingSpeak requires cleanSession = true
+          clean: true,           // ThingSpeak REQUIRES cleanSession = true
           keepalive: 60,
-          connectTimeout: 15000,
-          reconnectPeriod: 0,   // disable auto-reconnect so we control it
+          connectTimeout: 12000, // 12s for CONNACK
+          reconnectPeriod: 0,    // we handle reconnect manually
           rejectUnauthorized: false
         });
       } catch (e) {
@@ -1118,10 +1127,13 @@
         return;
       }
 
+      let didConnect = false;
+
       mqttClient.on('connect', () => {
+        didConnect = true;
         mqttConnected = true;
         setBadge('mqttBadge', 'mqtt-connected');
-        logMQTT('✓ Connected to mqtt3.thingspeak.com');
+        logMQTT(`✓ Connected on port ${port}`);
         document.getElementById('mqttConnectBtn').disabled = true;
         document.getElementById('mqttDisconnectBtn').disabled = false;
 
@@ -1132,7 +1144,7 @@
             setMqttStatus('err', 'Subscribe failed: ' + err.message);
           } else {
             logMQTT('📡 Subscribed: ' + topic);
-            setMqttStatus('ok', `✓ Live! Streaming data from channel ${MQTT_CHANNEL}`);
+            setMqttStatus('ok', `✓ Live! Streaming from channel ${MQTT_CHANNEL} (port ${port})`);
           }
         });
       });
@@ -1142,42 +1154,80 @@
       });
 
       mqttClient.on('error', (err) => {
-        mqttConnected = false;
-        setBadge('mqttBadge', 'conn-error');
         const msg = err.message || String(err);
-        setMqttStatus('err', '✗ MQTT error: ' + msg);
         logMQTT('✗ Error: ' + msg);
+        if (!didConnect) {
+          // Try next port if available
+          if (portIndex + 1 < MQTT_PORTS.length) {
+            logMQTT(`↩ Retrying on port ${MQTT_PORTS[portIndex + 1]}…`);
+            setMqttStatus('info', `Port ${port} failed. Trying port ${MQTT_PORTS[portIndex + 1]}…`);
+            setTimeout(() => connectMQTT(portIndex + 1), 500);
+          } else {
+            mqttConnected = false;
+            setBadge('mqttBadge', 'conn-error');
+            showMqttHelp();
+          }
+        }
       });
 
       mqttClient.on('close', () => {
-        if (!mqttConnected) return; // already handled by error
+        if (!didConnect) return; // handled by error/timeout
         mqttConnected = false;
+        didConnect = false;
         setBadge('mqttBadge', 'conn-error');
-        setMqttStatus('err', '⚠ Connection closed. Try reconnecting or use REST polling.');
+        setMqttStatus('err', '⚠ Connection closed. Click Connect MQTT to retry, or use REST polling.');
         logMQTT('⚠ Connection closed');
         document.getElementById('mqttConnectBtn').disabled = false;
         document.getElementById('mqttDisconnectBtn').disabled = true;
       });
 
-      mqttClient.on('offline', () => {
-        logMQTT('⚠ Client went offline');
-      });
+      // connack timeout = broker received but didn't respond = credentials/permission issue
+      mqttClient.on('packetreceive', () => { /* keep alive */ });
 
-      // Manual timeout fallback — if no 'connect' event in 15s
+      // Fallback: if no connect event after 13s, try next port or show help
       const connTimeout = setTimeout(() => {
-        if (!mqttConnected && mqttClient) {
-          mqttClient.end(true);
+        if (!didConnect && mqttClient) {
+          logMQTT(`✗ No CONNACK on port ${port} after 13s`);
+          try { mqttClient.end(true); } catch(e){}
           mqttClient = null;
-          setBadge('mqttBadge', 'conn-error');
-          setMqttStatus('err', '✗ Connection timed out. Check: (1) open from http://localhost not file://, (2) ThingSpeak MQTT device has Subscribe permission for channel ' + MQTT_CHANNEL);
-          logMQTT('✗ Timed out after 15s');
-          document.getElementById('mqttConnectBtn').disabled = false;
-          document.getElementById('mqttDisconnectBtn').disabled = true;
+          if (portIndex + 1 < MQTT_PORTS.length) {
+            logMQTT(`↩ Retrying on port ${MQTT_PORTS[portIndex + 1]}…`);
+            setMqttStatus('info', `No response on port ${port}. Trying port ${MQTT_PORTS[portIndex + 1]}…`);
+            setTimeout(() => connectMQTT(portIndex + 1), 500);
+          } else {
+            mqttConnected = false;
+            setBadge('mqttBadge', 'conn-error');
+            showMqttHelp();
+          }
         }
-      }, 15000);
+      }, 13000);
 
-      // Clear the timeout once connected
       mqttClient.once('connect', () => clearTimeout(connTimeout));
+      mqttClient.once('error', () => clearTimeout(connTimeout));
+    }
+
+    function showMqttHelp() {
+      setBadge('mqttBadge', 'conn-error');
+      setMqttStatus('err',
+        '✗ MQTT failed on all ports. Fix: Go to ThingSpeak → Devices → MQTT → Edit your device → ' +
+        'make sure channel ' + MQTT_CHANNEL + ' is added with Subscribe permission. Then click Connect MQTT again. ' +
+        'Or use REST Polling below as a fallback.'
+      );
+      document.getElementById('mqttConnectBtn').disabled = false;
+      document.getElementById('mqttDisconnectBtn').disabled = true;
+    }
+
+    function disconnectMQTT() {
+      if (mqttClient) {
+        try { mqttClient.end(true); } catch (e) { /* ignore */ }
+        mqttClient = null;
+      }
+      mqttConnected = false;
+      setBadge('mqttBadge', '');
+      setMqttStatus('info', 'Disconnected from MQTT.');
+      logMQTT('■ Disconnected by user');
+      document.getElementById('mqttConnectBtn').disabled = false;
+      document.getElementById('mqttDisconnectBtn').disabled = true;
     }
 
     function disconnectMQTT() {
@@ -1581,9 +1631,8 @@
     // AUTO-CONNECT ON LOAD
     // ============================================================
     window.addEventListener('load', () => {
-      // Show a helpful tip before attempting
-      setMqttStatus('info', 'ℹ Tip: Open this file via http://localhost (not file://) for MQTT WSS to work. Connecting in 1s…');
-      setTimeout(connectMQTT, 1000);
+      setMqttStatus('info', 'Auto-connecting to ThingSpeak MQTT…');
+      setTimeout(() => connectMQTT(0), 1000);
     });
   </script>
 </body>
