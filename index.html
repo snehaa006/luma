@@ -1063,6 +1063,7 @@
     // MQTT — CONNECT / DISCONNECT
     // ============================================================
     const MQTT_PORTS = [8084, 443];
+    let heartbeatTimer = null;
 
     function connectMQTT(portIndex = 0) {
       manualDisconnect = false; // reset flag on new connection attempt
@@ -1119,6 +1120,14 @@
             setMqttStatus('ok', `✓ Live! Streaming from channel ${MQTT_CHANNEL} (port ${port})`);
           }
         });
+
+        // Heartbeat: publish every 20s so ThingSpeak doesn't drop idle subscribers
+        if (heartbeatTimer) clearInterval(heartbeatTimer);
+        heartbeatTimer = setInterval(() => {
+          if (mqttClient && mqttConnected) {
+            mqttClient.publish('channels/' + MQTT_CHANNEL + '/publish', 'hb', { qos: 0 }, () => {});
+          }
+        }, 20000);
       });
 
       mqttClient.on('message', (topic, payload) => {
@@ -1143,21 +1152,17 @@
 
       mqttClient.on('close', () => {
         if (!didConnect) return;
+        if (manualDisconnect) return; // user clicked disconnect — don't reconnect
         mqttConnected = false;
         didConnect = false;
-        setBadge('mqttBadge', 'conn-error');
-        setMqttStatus('err', '⚠ Connection dropped. Auto-reconnecting in 5s…');
-        logMQTT('⚠ Connection closed — auto-reconnecting in 5s…');
-        document.getElementById('mqttConnectBtn').disabled = true;
-        document.getElementById('mqttDisconnectBtn').disabled = false;
-
-        // Auto-reconnect after 5s
+        // Clear heartbeat timer on drop
+        if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+        // Silent reconnect — don't change status bar, badge stays green during reconnect attempt
         setTimeout(() => {
           if (!mqttConnected && !manualDisconnect) {
-            logMQTT('↩ Auto-reconnecting…');
             connectMQTT(0);
           }
-        }, 5000);
+        }, 3000);
       });
 
       const connTimeout = setTimeout(() => {
@@ -1198,6 +1203,7 @@
     // ✅ Only one disconnectMQTT function (duplicate removed)
     function disconnectMQTT() {
       manualDisconnect = true;
+      if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
       if (mqttClient) {
         try { mqttClient.end(true); } catch (e) { /* ignore */ }
         mqttClient = null;
