@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Luma — Smart Accessibility Suite</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <!-- mqtt.js — modern, maintained MQTT over WebSocket library (replaces deprecated Paho) -->
   <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -86,7 +85,6 @@
       border-color: rgba(0, 230, 118, 0.2);
     }
 
-    /* Settings button in nav */
     .nav-settings-btn {
       padding: 7px 14px;
       border-radius: 8px;
@@ -103,13 +101,10 @@
     }
     .nav-settings-btn:hover { color: var(--text); background: var(--surface-hover); }
 
-    /* --- Tab Content --- */
     .tab-content { display: none; padding-top: 80px; }
     .tab-content.active { display: block; }
 
-    /* ==========================================
-       SETTINGS MODAL
-       ========================================== */
+    /* SETTINGS MODAL */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -158,15 +153,12 @@
     .key-status.set { background: rgba(0,230,118,0.12); color: var(--accent); border: 1px solid rgba(0,230,118,0.2); }
     .key-status.unset { background: rgba(255,152,0,0.12); color: #ff9800; border: 1px solid rgba(255,152,0,0.2); }
 
-    /* ==========================================
-       TAB 1: IoT DASHBOARD
-       ========================================== */
+    /* TAB 1: IoT DASHBOARD */
     .dashboard-container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 20px;
     }
-
     .dashboard-header {
       text-align: center;
       padding: 30px 0;
@@ -218,7 +210,7 @@
     }
     .alert-close:hover { background: rgba(255, 255, 255, 0.3); }
 
-    /* ---- MQTT Connection Panel ---- */
+    /* MQTT Connection Panel */
     .mqtt-panel {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -241,7 +233,6 @@
     }
     .mqtt-badge-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
-    /* Connection badges */
     .connection-badge {
       display: flex;
       align-items: center;
@@ -270,7 +261,6 @@
     .connection-badge.conn-error .dot { background: var(--danger); }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    /* Buttons */
     .dash-btn {
       padding: 9px 20px;
       border-radius: 8px;
@@ -290,7 +280,6 @@
     .dash-btn.btn-cyan { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(0,200,255,0.25); }
     .dash-btn.btn-cyan:hover { background: rgba(0,200,255,0.2); box-shadow: 0 4px 16px rgba(0,200,255,0.15); }
 
-    /* MQTT Status bar */
     .mqtt-status-bar {
       margin-top: 12px;
       padding: 8px 14px;
@@ -302,7 +291,6 @@
     .mqtt-status-bar.err { background: rgba(244,67,54,0.1); border: 1px solid rgba(244,67,54,0.2); color: var(--danger); display: block; }
     .mqtt-status-bar.info { background: rgba(0,200,255,0.1); border: 1px solid rgba(0,200,255,0.2); color: var(--cyan); display: block; }
 
-    /* MQTT Log */
     .mqtt-log {
       background: rgba(0,0,0,0.45);
       border: 1px solid var(--border);
@@ -319,7 +307,6 @@
     .mqtt-log .log-line { margin-bottom: 3px; }
     .mqtt-log .log-ts { color: var(--accent); }
 
-    /* Source tag on cards */
     .source-tag {
       position: absolute;
       top: 10px; right: 12px;
@@ -333,7 +320,6 @@
     .source-tag.mqtt { background: rgba(0,230,118,0.15); color: var(--accent); }
     .source-tag.ts { background: rgba(0,200,255,0.15); color: var(--cyan); }
 
-    /* Config Section (REST) */
     .config-section {
       background: var(--surface);
       padding: 24px;
@@ -356,7 +342,6 @@
     .status-msg.success { background: rgba(0,230,118,0.15); color: var(--accent); display: block; }
     .status-msg.error { background: rgba(244,67,54,0.15); color: var(--danger); display: block; }
 
-    /* Sensor Cards */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -401,7 +386,6 @@
     .location-card .card-value { font-size: 1em; }
     .location-card .dash-btn { margin-top: 10px; padding: 8px 15px; font-size: 0.9em; }
 
-    /* Map embed */
     .map-embed {
       margin-top: 14px;
       border-radius: 10px;
@@ -410,7 +394,6 @@
     }
     .map-embed iframe { display: block; width: 100%; height: 200px; border: none; }
 
-    /* Camera Card */
     .camera-card { grid-column: span 2; display: flex; flex-direction: column; gap: 15px; }
     .video-container {
       position: relative;
@@ -459,7 +442,6 @@
       color: var(--text-secondary);
     }
 
-    /* Charts */
     .charts-section {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -476,9 +458,7 @@
     .chart-title { font-size: 1.05em; margin-bottom: 16px; text-align: center; font-weight: 600; }
     canvas { max-height: 300px; }
 
-    /* ==========================================
-       TAB 2: EXTENSION DOWNLOAD
-       ========================================== */
+    /* TAB 2: EXTENSION DOWNLOAD */
     .ext-container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
 
     .hero {
@@ -726,9 +706,7 @@
     </div>
   </div>
 
-  <!-- ==========================================
-       TAB 1: IoT DASHBOARD
-       ========================================== -->
+  <!-- TAB 1: IoT DASHBOARD -->
   <div id="tab-dashboard" class="tab-content active">
     <div class="dashboard-container">
 
@@ -873,9 +851,7 @@
     </div>
   </div>
 
-  <!-- ==========================================
-       TAB 2: VOICE EXTENSION DOWNLOAD
-       ========================================== -->
+  <!-- TAB 2: VOICE EXTENSION DOWNLOAD -->
   <div id="tab-extension" class="tab-content">
     <div class="ext-container">
 
@@ -1018,7 +994,6 @@
     function openSettings() {
       const modal = document.getElementById('settingsModal');
       modal.classList.add('open');
-      // Populate field from memory (show masked placeholder if set)
       document.getElementById('geminiApiKeyInput').value = geminiApiKey || '';
       updateKeyBadge();
     }
@@ -1055,10 +1030,10 @@
     const MQTT_CHANNEL  = '3189837';
     const MQTT_USERNAME = 'JgwMHQ4UFR04PRspJAMvDTs';
     const MQTT_PASSWORD = 'QnphD4oJcgOuopRgunNa2lWg';
+    const MQTT_CLIENT_ID = 'JgwMHQ4UFR04PRspJAMvDTs'; // ✅ FIXED: must match ThingSpeak registered Client ID exactly
     const REST_CHANNEL  = '3189837';
     const REST_API_KEY  = 'UV95Z7DVWGRB97IT';
 
-    // Fixed campus location
     const FIXED_LAT = 28.6681;
     const FIXED_LON = 77.1133;
 
@@ -1082,32 +1057,27 @@
       latitude: [], longitude: [], labels: []
     };
 
-    // Refresh key badge on load
     updateKeyBadge();
 
     // ============================================================
-    // MQTT — CONNECT / DISCONNECT  (using mqtt.js v5, not Paho)
-    // Tries port 8084 first, falls back to port 443 if connack times out.
-    // connack timeout = ThingSpeak sees the connection but rejects it,
-    // usually because the MQTT Device doesn't have Subscribe permission.
+    // MQTT — CONNECT / DISCONNECT
     // ============================================================
-    let mqttPortIndex = 0;
     const MQTT_PORTS = [8084, 443];
 
     function connectMQTT(portIndex = 0) {
-      mqttPortIndex = portIndex;
       document.getElementById('mqttConnectBtn').disabled = true;
       document.getElementById('mqttDisconnectBtn').disabled = true;
 
       const port = MQTT_PORTS[portIndex];
       const brokerUrl = `wss://mqtt3.thingspeak.com:${port}/mqtt`;
-      const clientId = MQTT_USERNAME + '_' + Math.random().toString(16).slice(2, 10);
+
+      // ✅ FIXED: Use exact registered Client ID — no random suffix
+      const clientId = MQTT_CLIENT_ID;
 
       setMqttStatus('info', `Connecting via WSS port ${port}…`);
       setBadge('mqttBadge', '');
-      logMQTT(`▶ Trying ${brokerUrl} (clientId: ${clientId.slice(-8)})`);
+      logMQTT(`▶ Trying ${brokerUrl} (clientId: ${clientId})`);
 
-      // Clean up any previous client
       if (mqttClient) { try { mqttClient.end(true); } catch(e){} mqttClient = null; }
 
       try {
@@ -1115,10 +1085,10 @@
           clientId,
           username: MQTT_USERNAME,
           password: MQTT_PASSWORD,
-          clean: true,           // ThingSpeak REQUIRES cleanSession = true
+          clean: true,
           keepalive: 60,
-          connectTimeout: 12000, // 12s for CONNACK
-          reconnectPeriod: 0,    // we handle reconnect manually
+          connectTimeout: 12000,
+          reconnectPeriod: 0,
           rejectUnauthorized: false
         });
       } catch (e) {
@@ -1157,7 +1127,6 @@
         const msg = err.message || String(err);
         logMQTT('✗ Error: ' + msg);
         if (!didConnect) {
-          // Try next port if available
           if (portIndex + 1 < MQTT_PORTS.length) {
             logMQTT(`↩ Retrying on port ${MQTT_PORTS[portIndex + 1]}…`);
             setMqttStatus('info', `Port ${port} failed. Trying port ${MQTT_PORTS[portIndex + 1]}…`);
@@ -1171,7 +1140,7 @@
       });
 
       mqttClient.on('close', () => {
-        if (!didConnect) return; // handled by error/timeout
+        if (!didConnect) return;
         mqttConnected = false;
         didConnect = false;
         setBadge('mqttBadge', 'conn-error');
@@ -1181,10 +1150,6 @@
         document.getElementById('mqttDisconnectBtn').disabled = true;
       });
 
-      // connack timeout = broker received but didn't respond = credentials/permission issue
-      mqttClient.on('packetreceive', () => { /* keep alive */ });
-
-      // Fallback: if no connect event after 13s, try next port or show help
       const connTimeout = setTimeout(() => {
         if (!didConnect && mqttClient) {
           logMQTT(`✗ No CONNACK on port ${port} after 13s`);
@@ -1217,19 +1182,7 @@
       document.getElementById('mqttDisconnectBtn').disabled = true;
     }
 
-    function disconnectMQTT() {
-      if (mqttClient) {
-        try { mqttClient.end(true); } catch (e) { /* ignore */ }
-        mqttClient = null;
-      }
-      mqttConnected = false;
-      setBadge('mqttBadge', '');
-      setMqttStatus('info', 'Disconnected from MQTT.');
-      logMQTT('■ Disconnected by user');
-      document.getElementById('mqttConnectBtn').disabled = false;
-      document.getElementById('mqttDisconnectBtn').disabled = true;
-    }
-
+    // ✅ FIXED: Only one disconnectMQTT function (duplicate removed)
     function disconnectMQTT() {
       if (mqttClient) {
         try { mqttClient.end(true); } catch (e) { /* ignore */ }
@@ -1253,13 +1206,11 @@
       const val = payload.trim();
       logMQTT(`← ${topic}: ${val}`);
 
-      // Extract field number from: channels/<id>/subscribe/fields/field<N>
       const match = topic.match(/\/fields\/field(\d+)$/);
       if (!match) return;
       const fieldKey = 'field' + match[1];
       mqttFieldBuffer[fieldKey] = val;
 
-      // Debounce — wait 200ms for a burst of fields to settle before updating UI
       clearTimeout(mqttFlushTimer);
       mqttFlushTimer = setTimeout(() => {
         const feed = { ...mqttFieldBuffer, created_at: new Date().toISOString() };
@@ -1307,7 +1258,6 @@
       const srcClass = source;
       const srcLabel = source === 'mqtt' ? 'MQTT' : 'REST';
 
-      // Distance — field1
       if (feed.field1 != null && feed.field1 !== '') {
         const dist = parseFloat(feed.field1).toFixed(1);
         document.getElementById('distance').textContent = dist;
@@ -1323,13 +1273,11 @@
         }
       }
 
-      // Rain — field2
       if (feed.field2 != null && feed.field2 !== '') {
         document.getElementById('rain').textContent = parseInt(feed.field2);
         setSourceTag('srcRain', srcLabel, srcClass);
       }
 
-      // Button — field3
       if (feed.field3 != null && feed.field3 !== '') {
         const st = parseInt(feed.field3);
         if (lastButtonState !== null && lastButtonState === 1 && st === 0) {
@@ -1342,7 +1290,6 @@
         setSourceTag('srcButton', srcLabel, srcClass);
       }
 
-      // Buzzer — field6
       if (feed.field6 != null && feed.field6 !== '') {
         const st = parseInt(feed.field6);
         document.getElementById('buzzerText').textContent = st === 1 ? 'ON' : 'OFF';
@@ -1350,7 +1297,6 @@
         setSourceTag('srcBuzzer', srcLabel, srcClass);
       }
 
-      // Servo — field7
       if (feed.field7 != null && feed.field7 !== '') {
         const st = parseInt(feed.field7);
         document.getElementById('servoText').textContent = st === 1 ? 'ON' : 'OFF';
@@ -1358,7 +1304,6 @@
         setSourceTag('srcServo', srcLabel, srcClass);
       }
 
-      // Location — field4/field5
       const lat = (feed.field4 != null && feed.field4 !== '') ? parseFloat(feed.field4) : null;
       const lon = (feed.field5 != null && feed.field5 !== '') ? parseFloat(feed.field5) : null;
       if (lat != null && lon != null && !isNaN(lat) && !isNaN(lon)) {
@@ -1453,8 +1398,6 @@
 
     // ============================================================
     // CAMERA + AI VISION
-    // Updated model list — current as of 2026. 1.5 models deprecated.
-    // Priority: gemini-2.5-flash → gemini-2.0-flash → gemini-2.5-flash-lite
     // ============================================================
     async function initCamera() {
       try {
@@ -1483,7 +1426,6 @@
         return;
       }
 
-      // Prevent double-firing while a scan is in progress
       const scanBtn = document.getElementById('scanBtn');
       if (scanBtn.dataset.scanning === 'true') return;
       scanBtn.dataset.scanning = 'true';
@@ -1496,13 +1438,10 @@
       canvas.getContext('2d').drawImage(video, 0, 0);
       const b64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
-      // Always re-query the element — never cache it across async gaps
       const getEl = () => document.getElementById('aiResponse');
       getEl().textContent = "⌛ Analyzing environment…";
       dashSpeak("Scanning environment. Please wait.");
 
-      // Current valid multimodal models (as of April 2026)
-      // gemini-2.5-flash uses "thinking" — we disable it for speed + to avoid empty text parts
       const models = [
         'gemini-2.5-flash',
         'gemini-2.0-flash',
@@ -1516,7 +1455,6 @@
 
       for (const model of models) {
         try {
-          // For 2.5 models, disable thinking to get a clean text-only response
           const is25 = model.includes('2.5');
           const body = {
             contents: [{
@@ -1545,7 +1483,6 @@
             continue;
           }
 
-          // Extract only non-empty text parts (skip thinking/tool parts)
           const parts = d.candidates?.[0]?.content?.parts || [];
           const txt = parts
             .filter(p => p.text && p.text.trim().length > 0)
@@ -1580,7 +1517,6 @@
         }
       }
 
-      // Re-enable scan button
       scanBtn.dataset.scanning = 'false';
       scanBtn.disabled = false;
     }
