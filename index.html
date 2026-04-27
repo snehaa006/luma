@@ -1483,6 +1483,12 @@
         return;
       }
 
+      // Prevent double-firing while a scan is in progress
+      const scanBtn = document.getElementById('scanBtn');
+      if (scanBtn.dataset.scanning === 'true') return;
+      scanBtn.dataset.scanning = 'true';
+      scanBtn.disabled = true;
+
       const video = document.getElementById('cameraPreview');
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
@@ -1490,11 +1496,13 @@
       canvas.getContext('2d').drawImage(video, 0, 0);
       const b64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
-      const el = document.getElementById('aiResponse');
-      el.textContent = "⌛ Analyzing environment…";
+      // Always re-query the element — never cache it across async gaps
+      const getEl = () => document.getElementById('aiResponse');
+      getEl().textContent = "⌛ Analyzing environment…";
       dashSpeak("Scanning environment. Please wait.");
 
       // Current valid multimodal models (as of April 2026)
+      // gemini-2.5-flash uses "thinking" — we disable it for speed + to avoid empty text parts
       const models = [
         'gemini-2.5-flash',
         'gemini-2.0-flash',
@@ -1508,21 +1516,25 @@
 
       for (const model of models) {
         try {
+          // For 2.5 models, disable thinking to get a clean text-only response
+          const is25 = model.includes('2.5');
+          const body = {
+            contents: [{
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: 'image/jpeg', data: b64 } }
+              ]
+            }],
+            generationConfig: {
+              temperature: 0.1,
+              maxOutputTokens: 256,
+              ...(is25 ? { thinkingConfig: { thinkingBudget: 0 } } : {})
+            }
+          };
+
           const res = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{
-                  parts: [
-                    { text: prompt },
-                    { inlineData: { mimeType: 'image/jpeg', data: b64 } }
-                  ]
-                }],
-                generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
-              })
-            }
+            { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
           );
 
           const d = await res.json();
@@ -1533,20 +1545,24 @@
             continue;
           }
 
-          const txt = d.candidates?.[0]?.content?.parts
-            ?.map(p => p.text || '')
+          // Extract only non-empty text parts (skip thinking/tool parts)
+          const parts = d.candidates?.[0]?.content?.parts || [];
+          const txt = parts
+            .filter(p => p.text && p.text.trim().length > 0)
+            .map(p => p.text.trim())
             .join(' ')
             .replace(/\*\*/g, '')
             .trim();
 
           if (txt) {
-            el.textContent = txt;
+            getEl().textContent = txt;
             dashSpeak(txt);
-            logMQTT(`✓ Vision: ${model}`);
+            logMQTT(`✓ Vision OK (${model})`);
             success = true;
             break;
           } else {
-            lastErr = 'Empty response from model';
+            lastErr = 'Empty response — model returned no text parts';
+            logMQTT(`⚠ ${model}: empty text in response`);
           }
         } catch (e) {
           lastErr = e.message;
@@ -1556,13 +1572,17 @@
 
       if (!success) {
         if (lastErr.toLowerCase().includes('api key') || lastErr.toLowerCase().includes('invalid')) {
-          el.textContent = '❌ Invalid API key. Click ⚙️ Settings to update it.';
+          getEl().textContent = '❌ Invalid API key. Click ⚙️ Settings to update it.';
         } else if (lastErr.includes('429') || lastErr.toLowerCase().includes('quota')) {
-          el.textContent = '❌ Quota exceeded — wait a moment and try again.';
+          getEl().textContent = '❌ Quota exceeded — wait a moment and try again.';
         } else {
-          el.textContent = '❌ Scan failed: ' + lastErr;
+          getEl().textContent = '❌ Scan failed: ' + lastErr;
         }
       }
+
+      // Re-enable scan button
+      scanBtn.dataset.scanning = 'false';
+      scanBtn.disabled = false;
     }
 
     // ============================================================
