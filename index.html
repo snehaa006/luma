@@ -1065,6 +1065,7 @@
     const MQTT_PORTS = [8084, 443];
 
     function connectMQTT(portIndex = 0) {
+      manualDisconnect = false; // reset flag on new connection attempt
       document.getElementById('mqttConnectBtn').disabled = true;
       document.getElementById('mqttDisconnectBtn').disabled = true;
 
@@ -1086,10 +1087,11 @@
           username: MQTT_USERNAME,
           password: MQTT_PASSWORD,
           clean: true,
-          keepalive: 60,
+          keepalive: 30,
           connectTimeout: 12000,
           reconnectPeriod: 0,
-          rejectUnauthorized: false
+          rejectUnauthorized: false,
+          pingInterval: 10000  // ping every 10s to keep connection alive
         });
       } catch (e) {
         setMqttStatus('err', 'MQTT init failed: ' + e.message);
@@ -1144,10 +1146,18 @@
         mqttConnected = false;
         didConnect = false;
         setBadge('mqttBadge', 'conn-error');
-        setMqttStatus('err', '⚠ Connection closed. Click Connect MQTT to retry, or use REST polling.');
-        logMQTT('⚠ Connection closed');
-        document.getElementById('mqttConnectBtn').disabled = false;
-        document.getElementById('mqttDisconnectBtn').disabled = true;
+        setMqttStatus('err', '⚠ Connection dropped. Auto-reconnecting in 5s…');
+        logMQTT('⚠ Connection closed — auto-reconnecting in 5s…');
+        document.getElementById('mqttConnectBtn').disabled = true;
+        document.getElementById('mqttDisconnectBtn').disabled = false;
+
+        // Auto-reconnect after 5s
+        setTimeout(() => {
+          if (!mqttConnected && !manualDisconnect) {
+            logMQTT('↩ Auto-reconnecting…');
+            connectMQTT(0);
+          }
+        }, 5000);
       });
 
       const connTimeout = setTimeout(() => {
@@ -1182,8 +1192,12 @@
       document.getElementById('mqttDisconnectBtn').disabled = true;
     }
 
-    // ✅ FIXED: Only one disconnectMQTT function (duplicate removed)
+    // ✅ Manual disconnect flag — prevents auto-reconnect from firing
+    let manualDisconnect = false;
+
+    // ✅ Only one disconnectMQTT function (duplicate removed)
     function disconnectMQTT() {
+      manualDisconnect = true;
       if (mqttClient) {
         try { mqttClient.end(true); } catch (e) { /* ignore */ }
         mqttClient = null;
