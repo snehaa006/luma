@@ -323,85 +323,6 @@
       flex-direction: column;
       gap: 15px;
     }
-
-    /* ============================================
-       DETECTION MODE TOGGLE
-       ============================================ */
-    .detection-mode-toggle {
-      display: flex;
-      gap: 8px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 6px;
-      width: fit-content;
-    }
-    .mode-btn {
-      padding: 7px 18px;
-      border-radius: 7px;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 0.88em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .mode-btn.active {
-      background: var(--accent);
-      color: #0b0f1a;
-    }
-    .mode-btn:hover:not(.active) {
-      background: var(--surface-hover);
-      color: var(--text);
-    }
-
-    /* API key input for Roboflow */
-    .rf-api-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .rf-api-row input {
-      flex: 1;
-      min-width: 200px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      font-size: 0.9em;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-    }
-    .rf-api-row input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-dim);
-    }
-    .rf-api-row input::placeholder { color: rgba(255,255,255,0.25); }
-    .rf-save-btn {
-      padding: 8px 18px;
-      border-radius: 8px;
-      border: none;
-      background: rgba(0,230,118,0.15);
-      color: var(--accent);
-      font-size: 0.88em;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid rgba(0,230,118,0.25);
-      transition: all 0.2s;
-    }
-    .rf-save-btn:hover { background: rgba(0,230,118,0.25); }
-    .rf-status {
-      font-size: 0.82em;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
-    .rf-status.ok { color: var(--accent); }
-    .rf-status.err { color: var(--danger); }
-
-    /* Video + canvas overlay wrapper */
     .video-container {
       position: relative;
       width: 100%;
@@ -414,50 +335,12 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
     }
-    /* Bounding box canvas sits on top of video */
-    #detectionCanvas {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-    /* Upload image preview replaces video */
-    #uploadPreview {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #000;
-      display: none;
-    }
-
-    /* Upload drop zone */
-    .upload-zone {
-      border: 2px dashed rgba(0,230,118,0.3);
-      border-radius: 10px;
-      padding: 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: rgba(0,230,118,0.03);
-      display: none;
-    }
-    .upload-zone:hover, .upload-zone.drag-over {
-      border-color: var(--accent);
-      background: var(--accent-dim);
-    }
-    .upload-zone p { color: var(--text-secondary); font-size: 0.9em; margin-top: 6px; }
-    .upload-zone .upload-icon { font-size: 2rem; }
-    #fileInput { display: none; }
-
     .camera-controls {
       display: flex;
       gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
-      align-items: center;
     }
     .scan-btn {
       background: #2196F3;
@@ -485,25 +368,6 @@
       70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(0, 188, 212, 0); }
       100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 188, 212, 0); }
     }
-
-    /* Live detection toggle */
-    .live-detect-btn {
-      background: #e91e63;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 0.95em;
-      transition: all 0.2s;
-    }
-    .live-detect-btn.running { background: #4caf50; }
-    .live-detect-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
-
     .ai-response {
       background: rgba(0, 0, 0, 0.3);
       padding: 16px;
@@ -513,45 +377,6 @@
       min-height: 50px;
       font-size: 0.95em;
       color: var(--text-secondary);
-    }
-
-    /* Detection results list */
-    .detection-results {
-      background: rgba(0,0,0,0.25);
-      border-radius: 10px;
-      padding: 14px 16px;
-      border: 1px solid var(--border);
-      font-size: 0.88em;
-      min-height: 44px;
-      display: none;
-    }
-    .detection-results.visible { display: block; }
-    .detection-results .det-title {
-      font-size: 0.8em;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-    }
-    .det-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .det-tag {
-      background: rgba(0,230,118,0.1);
-      border: 1px solid rgba(0,230,118,0.2);
-      color: var(--accent);
-      padding: 3px 10px;
-      border-radius: 100px;
-      font-size: 0.82em;
-      font-weight: 600;
-    }
-    .det-tag.danger {
-      background: rgba(244,67,54,0.12);
-      border-color: rgba(244,67,54,0.3);
-      color: #ff6b6b;
     }
 
     /* Charts */
@@ -666,7 +491,9 @@
     }
 
     /* Section Styling */
-    .ext-section { padding: 80px 0; }
+    .ext-section {
+      padding: 80px 0;
+    }
     .section-label {
       display: inline-block;
       background: var(--accent-dim);
@@ -938,81 +765,30 @@
             <span id="servoText">--</span>
           </div>
         </div>
-
-        <!-- ============================================
-             CAMERA CARD — with SafeWalkBD Detection
-             ============================================ -->
         <div class="card camera-card">
-          <div class="card-label">Environmental Scan (AI + Object Detection)</div>
-
-          <!-- Roboflow API Key row -->
-          <div style="background:rgba(0,0,0,0.2); border-radius:10px; padding:14px; border:1px solid var(--border);">
-            <div style="font-size:0.8em; font-weight:600; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.06em;">🔑 Roboflow API Key (for object detection)</div>
-            <div class="rf-api-row">
-              <input type="password" id="rfApiKey" placeholder="Enter your Roboflow API key..." autocomplete="off">
-              <button class="rf-save-btn" onclick="saveRfApiKey()">Save</button>
-            </div>
-            <div id="rfApiStatus" class="rf-status">No key saved. Get a free key at <a href="https://roboflow.com" target="_blank" style="color:var(--accent);">roboflow.com</a></div>
-          </div>
-
-          <!-- Detection Mode Toggle -->
-          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <span style="font-size:0.85em; color:var(--text-secondary); font-weight:600;">Mode:</span>
-            <div class="detection-mode-toggle">
-              <button class="mode-btn active" id="modeBtnGemini" onclick="setDetectionMode('gemini')">🤖 Gemini Scan</button>
-              <button class="mode-btn" id="modeBtnLive" onclick="setDetectionMode('live')">📹 Live Detection</button>
-              <button class="mode-btn" id="modeBtnUpload" onclick="setDetectionMode('upload')">🖼️ Upload Image</button>
-            </div>
-          </div>
-
-          <!-- Video + Canvas container -->
-          <div class="video-container" id="videoContainer">
+          <div class="card-label">Environmental Scan (AI)</div>
+          <div class="video-container">
             <video id="cameraPreview" autoplay playsinline title="Camera Preview"></video>
-            <canvas id="detectionCanvas"></canvas>
-            <img id="uploadPreview" alt="Uploaded image for detection">
           </div>
-
-          <!-- Upload drop zone (shown in upload mode) -->
-          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
-               ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-            <div class="upload-icon">📂</div>
-            <strong>Click or drag & drop an image</strong>
-            <p>Supports JPG, PNG, WEBP — SafeWalkBD will detect objects</p>
-            <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
-          </div>
-
-          <!-- Camera Controls -->
-          <div class="camera-controls" id="cameraControls">
+          <div class="camera-controls">
             <button class="dash-btn" id="startCameraBtn" onclick="initCamera()">Enable Camera</button>
-            <button class="dash-btn" id="flipCameraBtn" onclick="flipCamera()" style="display:none; background:#9C27B0;">Flip Camera</button>
-            <button class="scan-btn" id="scanBtn" onclick="captureAndScan()" disabled>🔍 Gemini Scan</button>
-            <button class="scan-btn" id="detectOnceBtn" onclick="detectOnce()" disabled style="background:#ff9800;">🎯 Detect Objects</button>
-            <button class="live-detect-btn" id="liveDetectBtn" onclick="toggleLiveDetection()" disabled>▶ Start Live Detection</button>
+            <button class="dash-btn" id="flipCameraBtn" onclick="flipCamera()" style="display: none; background: #9C27B0;">Flip Camera</button>
+            <button class="scan-btn" id="scanBtn" onclick="captureAndScan()" disabled>🔍 Scan Environment</button>
           </div>
-
-          <!-- Gemini AI Response -->
           <div id="aiResponse" class="ai-response">Waiting for scan...</div>
-
-          <!-- SafeWalkBD Detection Results -->
-          <div class="detection-results" id="detectionResults">
-            <div class="det-title">🎯 SafeWalkBD Detections</div>
-            <div class="det-tags" id="detTagsContainer"></div>
-          </div>
         </div>
-        <!-- end camera-card -->
-
         <div class="card location-card">
           <div class="card-label">Location</div>
           <div class="card-value">
-            <div id="latitude">Lat: 28.6982</div>
-            <div id="longitude">Lon: 77.1677</div>
+            <div id="latitude">Lat: 28.4501</div>
+            <div id="longitude">Lon: 77.5840</div>
             <button class="dash-btn" id="viewMapBtn" onclick="openMap()">📍 View on Map</button>
           </div>
-          <!-- Hardcoded map: IGDTUW ECE Block -->
+          <!-- Hardcoded map: German Hangar, Bennett University -->
           <div class="map-embed">
             <iframe
-              title="ECE Block, IGDTUW, Delhi"
-              src="https://www.google.com/maps?q=ECE+Block,+Indira+Gandhi+Delhi+Technical+University+for+Women,+Kashmere+Gate,+Delhi&output=embed"
+              title="German Hangar, Bennett University"
+              src="https://www.google.com/maps?q=German+Hangar,+Bennett+University,+Greater+Noida,+Uttar+Pradesh,+India&output=embed"
               allowfullscreen
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade">
@@ -1272,7 +1048,7 @@
        SCRIPTS
        ========================================== -->
   <script>
-    // ─── Tab Switching ────────────────────────────────────────────────────────
+    // --- Tab Switching ---
     function switchTab(tab) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
@@ -1281,14 +1057,16 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ─── Dashboard Hardcoded Credentials ────────────────────────────────────
+    // --- Dashboard Logic ---
+    // HARDCODED CREDENTIALS
     let channelId = '3189837';
     let apiKeyVal = 'UV95Z7DVWGRB97IT';
     let geminiApiKey = 'AIzaSyCuMjTq7esEekqjp5MnQGCerlgcSVdLzQA';
 
-    const FIXED_LAT = 28.6982;
-    const FIXED_LON = 77.1677;
-
+    // Fixed location: German Hangar, Bennett University
+    const FIXED_LAT = 28.4501;
+    const FIXED_LON = 77.5840;
+    
     let updateInterval = null;
     let isMonitoring = false;
     const maxDataPoints = 50;
@@ -1302,124 +1080,12 @@
     let currentFacingMode = 'environment';
     let currentStream = null;
 
-    // ─── Roboflow API Key ────────────────────────────────────────────────────
-    // Model: safewalkbd-l8jbn  (16 classes: Animal, Crosswalk, Obstacle, etc.)
-    const RF_MODEL   = 'safewalkbd-l8jbn';
-    const RF_VERSION = '1';
-    let rfApiKey = localStorage.getItem('rfApiKey') || '';
-
-    // Danger classes that warrant a voice warning
-    const DANGER_CLASSES = new Set([
-      'pothole','obstacle','railway','train','road-barrier','stairs','over-bridge'
-    ]);
-
-    // Colours per class for bounding boxes
-    const CLASS_COLORS = {
-      'animal':        '#ff9800',
-      'crosswalk':     '#2196f3',
-      'obstacle':      '#f44336',
-      'over-bridge':   '#9c27b0',
-      'person':        '#00bcd4',
-      'pole':          '#8bc34a',
-      'pothole':       '#f44336',
-      'railway':       '#ff5722',
-      'road-barrier':  '#ff5722',
-      'sidewalk':      '#4caf50',
-      'stairs':        '#ff9800',
-      'traffic-light': '#ffeb3b',
-      'traffic-sign':  '#ffeb3b',
-      'train':         '#f44336',
-      'tree':          '#4caf50',
-      'vehicle':       '#e91e63',
-    };
-
-    function saveRfApiKey() {
-      const val = document.getElementById('rfApiKey').value.trim();
-      if (!val) { setRfStatus('Please enter a key', false); return; }
-      rfApiKey = val;
-      localStorage.setItem('rfApiKey', val);
-      setRfStatus('✅ Key saved!', true);
-      updateDetectionButtons();
-    }
-
-    function setRfStatus(msg, ok) {
-      const el = document.getElementById('rfApiStatus');
-      el.textContent = msg;
-      el.className = 'rf-status ' + (ok ? 'ok' : 'err');
-    }
-
-    // Pre-fill if already saved
-    if (rfApiKey) {
-      document.getElementById('rfApiKey').value = rfApiKey;
-      setRfStatus('✅ Key loaded from storage', true);
-    }
-
-    function updateDetectionButtons() {
-      const hasCam = !!currentStream;
-      const hasKey = !!rfApiKey;
-      document.getElementById('detectOnceBtn').disabled  = !(hasCam && hasKey);
-      document.getElementById('liveDetectBtn').disabled  = !(hasCam && hasKey);
-    }
-
-    // ─── Detection Mode Toggle ───────────────────────────────────────────────
-    let detectionMode = 'gemini'; // 'gemini' | 'live' | 'upload'
-    let liveDetecting = false;
-    let liveDetectTimer = null;
-
-    function setDetectionMode(mode) {
-      detectionMode = mode;
-      ['gemini','live','upload'].forEach(m => {
-        document.getElementById('modeBtn' + m.charAt(0).toUpperCase() + m.slice(1)).classList.toggle('active', m === mode);
-      });
-
-      // Stop live detection if switching away
-      if (mode !== 'live' && liveDetecting) stopLiveDetection();
-
-      const uploadZone = document.getElementById('uploadZone');
-      const videoContainer = document.getElementById('videoContainer');
-      const cameraControls = document.getElementById('cameraControls');
-      const scanBtn = document.getElementById('scanBtn');
-      const detectOnceBtn = document.getElementById('detectOnceBtn');
-      const liveDetectBtn = document.getElementById('liveDetectBtn');
-
-      if (mode === 'upload') {
-        uploadZone.style.display = 'block';
-        // Hide camera-specific btns
-        document.getElementById('startCameraBtn').style.display = 'none';
-        document.getElementById('flipCameraBtn').style.display = 'none';
-        scanBtn.style.display = 'none';
-        detectOnceBtn.style.display = 'inline-flex';
-        detectOnceBtn.disabled = !rfApiKey; // no camera needed for upload
-        liveDetectBtn.style.display = 'none';
-        // Show upload preview, hide video
-        document.getElementById('cameraPreview').style.display = 'none';
-        document.getElementById('uploadPreview').style.display = 'block';
-      } else {
-        uploadZone.style.display = 'none';
-        document.getElementById('cameraPreview').style.display = 'block';
-        document.getElementById('uploadPreview').style.display = 'none';
-        document.getElementById('startCameraBtn').style.display = currentStream ? 'none' : 'inline-flex';
-        document.getElementById('flipCameraBtn').style.display = currentStream ? 'inline-block' : 'none';
-
-        if (mode === 'gemini') {
-          scanBtn.style.display = 'inline-flex';
-          detectOnceBtn.style.display = 'none';
-          liveDetectBtn.style.display = 'none';
-        } else { // live
-          scanBtn.style.display = 'none';
-          detectOnceBtn.style.display = 'inline-flex';
-          liveDetectBtn.style.display = 'inline-flex';
-          updateDetectionButtons();
-        }
-      }
-      clearCanvas();
-      document.getElementById('detectionResults').classList.remove('visible');
-    }
-
-    // ─── Camera ──────────────────────────────────────────────────────────────
+    // Camera functions
     async function initCamera() {
       try {
-        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+        if (currentStream) {
+          currentStream.getTracks().forEach(track => track.stop());
+        }
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: currentFacingMode }
         });
@@ -1428,7 +1094,6 @@
         document.getElementById('scanBtn').disabled = false;
         document.getElementById('startCameraBtn').style.display = 'none';
         document.getElementById('flipCameraBtn').style.display = 'inline-block';
-        updateDetectionButtons();
         dashSpeak(`Camera enabled using ${currentFacingMode === 'environment' ? 'back' : 'front'} lens.`);
       } catch (err) {
         console.error("Error accessing camera:", err);
@@ -1441,7 +1106,6 @@
       await initCamera();
     }
 
-    // ─── Speech helper (uses existing dashSpeak) ─────────────────────────────
     function dashSpeak(text) {
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text);
@@ -1449,244 +1113,14 @@
       }
     }
 
-    // ─── SafeWalkBD: get base64 from video or uploaded image ────────────────
-    function getFrameBase64(sourceEl) {
-      const canvas = document.createElement('canvas');
-      canvas.width  = sourceEl.naturalWidth  || sourceEl.videoWidth  || 640;
-      canvas.height = sourceEl.naturalHeight || sourceEl.videoHeight || 480;
-      canvas.getContext('2d').drawImage(sourceEl, 0, 0);
-      return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-    }
-
-    // ─── Call Roboflow inference API ─────────────────────────────────────────
-    async function runRoboflowDetection(base64img) {
-      if (!rfApiKey) throw new Error('No Roboflow API key set.');
-      const url = `https://detect.roboflow.com/${RF_MODEL}/${RF_VERSION}?api_key=${rfApiKey}`;
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: base64img
-      });
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error(err.message || `HTTP ${resp.status}`);
-      }
-      return resp.json(); // { predictions: [{class, confidence, x, y, width, height}] }
-    }
-
-    // ─── Draw bounding boxes on canvas ───────────────────────────────────────
-    function drawDetections(predictions, sourceEl) {
-      const canvas = document.getElementById('detectionCanvas');
-      const ctx    = canvas.getContext('2d');
-
-      // Match canvas size to the displayed video/image element
-      const rect = sourceEl.getBoundingClientRect();
-      canvas.width  = rect.width;
-      canvas.height = rect.height;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // The model returns coordinates relative to the original image dimensions
-      const scaleX = canvas.width  / (sourceEl.naturalWidth  || sourceEl.videoWidth  || canvas.width);
-      const scaleY = canvas.height / (sourceEl.naturalHeight || sourceEl.videoHeight || canvas.height);
-
-      predictions.forEach(pred => {
-        const label  = pred.class.toLowerCase();
-        const conf   = Math.round(pred.confidence * 100);
-        const color  = CLASS_COLORS[label] || '#00e676';
-
-        // Roboflow returns center x,y + width/height
-        const x = (pred.x - pred.width  / 2) * scaleX;
-        const y = (pred.y - pred.height / 2) * scaleY;
-        const w = pred.width  * scaleX;
-        const h = pred.height * scaleY;
-
-        // Box
-        ctx.strokeStyle = color;
-        ctx.lineWidth   = 2.5;
-        ctx.strokeRect(x, y, w, h);
-
-        // Background for label
-        ctx.fillStyle = color;
-        const labelText = `${pred.class} ${conf}%`;
-        ctx.font = 'bold 13px Inter, sans-serif';
-        const textW = ctx.measureText(labelText).width + 10;
-        ctx.fillRect(x - 1, y - 22, textW, 20);
-
-        // Label text
-        ctx.fillStyle = '#000';
-        ctx.fillText(labelText, x + 4, y - 6);
-      });
-    }
-
-    function clearCanvas() {
-      const canvas = document.getElementById('detectionCanvas');
-      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    // ─── Show detection tags + voice announcement ─────────────────────────────
-    function showDetectionResults(predictions) {
-      const resultsEl  = document.getElementById('detectionResults');
-      const tagsEl     = document.getElementById('detTagsContainer');
-
-      if (!predictions || predictions.length === 0) {
-        tagsEl.innerHTML = '<span style="color:var(--text-secondary); font-size:0.85em;">No objects detected.</span>';
-        resultsEl.classList.add('visible');
+    async function captureAndScan() {
+      if (!geminiApiKey) {
+        alert("Gemini API Key is missing.");
         return;
       }
-
-      // Deduplicate classes
-      const seen = new Map();
-      predictions.forEach(p => {
-        const lbl = p.class.toLowerCase();
-        if (!seen.has(lbl) || seen.get(lbl) < p.confidence) seen.set(lbl, p.confidence);
-      });
-
-      tagsEl.innerHTML = '';
-      const uniqueClasses = [];
-      seen.forEach((conf, lbl) => {
-        uniqueClasses.push(lbl);
-        const tag = document.createElement('span');
-        tag.className = 'det-tag' + (DANGER_CLASSES.has(lbl) ? ' danger' : '');
-        tag.textContent = `${lbl} (${Math.round(conf * 100)}%)`;
-        tagsEl.appendChild(tag);
-      });
-      resultsEl.classList.add('visible');
-
-      // Voice announcement
-      const dangers = uniqueClasses.filter(c => DANGER_CLASSES.has(c));
-      if (dangers.length > 0) {
-        dashSpeak(`Warning! Detected: ${dangers.join(', ')} ahead.`);
-      } else if (uniqueClasses.length > 0) {
-        dashSpeak(`Detected: ${uniqueClasses.slice(0, 4).join(', ')}.`);
-      }
-    }
-
-    // ─── Detect Once (snapshot from camera or uploaded image) ────────────────
-    async function detectOnce() {
-      if (!rfApiKey) { alert('Please enter your Roboflow API key first.'); return; }
-
-      let sourceEl;
-      let base64img;
-
-      if (detectionMode === 'upload') {
-        sourceEl = document.getElementById('uploadPreview');
-        if (!sourceEl.src || sourceEl.src === window.location.href) {
-          alert('Please upload an image first.'); return;
-        }
-        base64img = getFrameBase64(sourceEl);
-      } else {
-        const video = document.getElementById('cameraPreview');
-        if (!currentStream) { alert('Please enable the camera first.'); return; }
-        sourceEl  = video;
-        base64img = getFrameBase64(video);
-      }
-
-      const btn = document.getElementById('detectOnceBtn');
-      btn.disabled = true;
-      btn.textContent = '⏳ Detecting...';
-
-      try {
-        const result = await runRoboflowDetection(base64img);
-        drawDetections(result.predictions || [], sourceEl);
-        showDetectionResults(result.predictions || []);
-      } catch (err) {
-        console.error('Detection error:', err);
-        alert('Detection failed: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '🎯 Detect Objects';
-      }
-    }
-
-    // ─── Live Detection (runs every 1.5 s on the video feed) ─────────────────
-    function toggleLiveDetection() {
-      if (liveDetecting) {
-        stopLiveDetection();
-      } else {
-        startLiveDetection();
-      }
-    }
-
-    function startLiveDetection() {
-      if (!rfApiKey) { alert('Please enter your Roboflow API key first.'); return; }
-      if (!currentStream) { alert('Please enable the camera first.'); return; }
-      liveDetecting = true;
-      const btn = document.getElementById('liveDetectBtn');
-      btn.textContent = '⏹ Stop Live Detection';
-      btn.classList.add('running');
-      runLiveFrame();
-    }
-
-    function stopLiveDetection() {
-      liveDetecting = false;
-      if (liveDetectTimer) clearTimeout(liveDetectTimer);
-      const btn = document.getElementById('liveDetectBtn');
-      btn.textContent = '▶ Start Live Detection';
-      btn.classList.remove('running');
-      clearCanvas();
-      document.getElementById('detectionResults').classList.remove('visible');
-    }
-
-    async function runLiveFrame() {
-      if (!liveDetecting) return;
-      const video = document.getElementById('cameraPreview');
-      try {
-        const base64img = getFrameBase64(video);
-        const result    = await runRoboflowDetection(base64img);
-        if (liveDetecting) {
-          drawDetections(result.predictions || [], video);
-          showDetectionResults(result.predictions || []);
-        }
-      } catch (err) {
-        console.warn('Live detection frame error:', err);
-      }
-      if (liveDetecting) {
-        liveDetectTimer = setTimeout(runLiveFrame, 1500); // ~0.67 fps — stays within free tier
-      }
-    }
-
-    // ─── Image Upload Handling ────────────────────────────────────────────────
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (file) loadUploadedImage(file);
-    }
-
-    function handleDragOver(e) {
-      e.preventDefault();
-      document.getElementById('uploadZone').classList.add('drag-over');
-    }
-    function handleDragLeave(e) {
-      document.getElementById('uploadZone').classList.remove('drag-over');
-    }
-    function handleDrop(e) {
-      e.preventDefault();
-      document.getElementById('uploadZone').classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) loadUploadedImage(file);
-    }
-
-    function loadUploadedImage(file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const preview = document.getElementById('uploadPreview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        clearCanvas();
-        document.getElementById('detectionResults').classList.remove('visible');
-        // Auto-detect if key is present
-        if (rfApiKey) {
-          preview.onload = () => detectOnce();
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // ─── Gemini Scan (original feature, unchanged) ───────────────────────────
-    async function captureAndScan() {
-      if (!geminiApiKey) { alert("Gemini API Key is missing."); return; }
       const video = document.getElementById('cameraPreview');
       const canvas = document.createElement('canvas');
-      canvas.width  = video.videoWidth;
+      canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0);
       const base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
@@ -1696,10 +1130,11 @@
 
       try {
         const modelsToTry = [
-          'gemini-2.0-flash','gemini-2.0-flash-001','gemini-flash-latest',
-          'gemini-2.5-flash','gemini-1.5-flash','gemini-1.5-flash-latest'
+          'gemini-2.0-flash', 'gemini-2.0-flash-001', 'gemini-flash-latest',
+          'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'
         ];
-        let success = false, lastError = "";
+        let success = false;
+        let lastError = "";
 
         for (const modelName of modelsToTry) {
           try {
@@ -1715,7 +1150,7 @@
               })
             });
             const data = await response.json();
-            if (response.ok && data.candidates?.length > 0) {
+            if (response.ok && data.candidates && data.candidates.length > 0) {
               const description = data.candidates[0].content.parts.map(p => p.text).join(' ').replace(/\*\*/g, '').trim();
               if (description) {
                 aiResponseEl.textContent = description;
@@ -1725,13 +1160,15 @@
               }
             }
             lastError = data.error ? data.error.message : "Model failed";
-          } catch (innerErr) { lastError = innerErr.message; }
+          } catch (innerErr) {
+            lastError = innerErr.message;
+          }
         }
         if (!success) throw new Error(lastError || "Could not find a supported Gemini model.");
       } catch (err) {
         let displayError = "Error analyzing image.";
         if (err.message.includes("API key")) {
-          displayError = "Invalid API Key.";
+          displayError = "Invalid API Key. Please get a fresh key from Google AI Studio.";
           dashSpeak("Your API key seems to be invalid.");
         } else if (err.message.includes("quota") || err.message.includes("429")) {
           displayError = "Quota Exceeded. Please wait 60 seconds.";
@@ -1743,11 +1180,13 @@
       }
     }
 
-    // ─── Dashboard Helpers ────────────────────────────────────────────────────
-    function dismissAlert() { document.getElementById('emergencyAlert').style.display = 'none'; }
+    function dismissAlert() {
+      document.getElementById('emergencyAlert').style.display = 'none';
+    }
 
+    // Always opens German Hangar, Bennett University on the map
     function openMap() {
-      window.open(`https://www.google.com/maps?q=ECE+Block,+Indira+Gandhi+Delhi+Technical+University+for+Women,+Kashmere+Gate,+Delhi`, '_blank');
+      window.open(`https://www.google.com/maps?q=German+Hangar,+Bennett+University,+Greater+Noida,+Uttar+Pradesh,+India`, '_blank');
     }
 
     function showStatus(message, isError) {
@@ -1839,14 +1278,15 @@
         servoIndicator.className = 'button-state';
       }
 
-      document.getElementById('latitude').textContent  = `Lat: ${FIXED_LAT.toFixed(7)}`;
+      // Location display is fixed to German Hangar, Bennett University
+      document.getElementById('latitude').textContent = `Lat: ${FIXED_LAT.toFixed(7)}`;
       document.getElementById('longitude').textContent = `Lon: ${FIXED_LON.toFixed(7)}`;
     }
 
     function updateChartsWithMultipleFeeds(feeds) {
       chartData.distance.length = 0; chartData.rain.length = 0;
-      chartData.button.length = 0;   chartData.buzzer.length = 0;
-      chartData.servo.length = 0;    chartData.latitude.length = 0;
+      chartData.button.length = 0; chartData.buzzer.length = 0;
+      chartData.servo.length = 0; chartData.latitude.length = 0;
       chartData.longitude.length = 0; chartData.labels.length = 0;
 
       feeds.forEach(feed => {
@@ -1865,11 +1305,11 @@
         const excess = chartData.distance.length - maxDataPoints;
         Object.values(chartData).forEach(arr => arr.splice(0, excess));
       }
-      [distanceChart, rainChart, buttonChart, buzzerChart, servoChart, latitudeChart, longitudeChart]
-        .forEach(c => c.update());
+
+      [distanceChart, rainChart, buttonChart, buzzerChart, servoChart, latitudeChart, longitudeChart].forEach(c => c.update());
     }
 
-    // ─── Charts ───────────────────────────────────────────────────────────────
+    // --- Charts ---
     const chartConfig = {
       type: 'line',
       options: {
@@ -1890,7 +1330,7 @@
       }}
     });
 
-    const coordConfig = () => ({
+    const coordConfig = (color) => ({
       ...chartConfig,
       options: { ...chartConfig.options, scales: { ...chartConfig.options.scales,
         y: { ...chartConfig.options.scales.y, beginAtZero: false, ticks: { color: '#9fa8c7', callback: v => v.toFixed(6) } }
@@ -1902,18 +1342,18 @@
     }
 
     const distanceChart = new Chart(document.getElementById('distanceChart'), { ...chartConfig, data: { labels: chartData.labels, datasets: [makeDataset('Distance (cm)', chartData.distance, '#4CAF50')] } });
-    const rainChart     = new Chart(document.getElementById('rainChart'),     { ...chartConfig, data: { labels: chartData.labels, datasets: [makeDataset('Rain Value', chartData.rain, '#2196F3')] } });
+    const rainChart = new Chart(document.getElementById('rainChart'), { ...chartConfig, data: { labels: chartData.labels, datasets: [makeDataset('Rain Value', chartData.rain, '#2196F3')] } });
 
     const btnLabelCb = v => v === 0 ? 'Pressed' : v === 1 ? 'Not Pressed' : '';
-    const onOffCb    = v => v === 0 ? 'OFF' : v === 1 ? 'ON' : '';
+    const onOffCb = v => v === 0 ? 'OFF' : v === 1 ? 'ON' : '';
 
-    const buttonChart  = new Chart(document.getElementById('buttonChart'),  { ...steppedConfig('#FF9800', btnLabelCb), data: { labels: chartData.labels, datasets: [makeDataset('Button State', chartData.button,  '#FF9800', { stepped: true })] } });
-    const buzzerChart  = new Chart(document.getElementById('buzzerChart'),  { ...steppedConfig('#E91E63', onOffCb),    data: { labels: chartData.labels, datasets: [makeDataset('Buzzer State', chartData.buzzer,  '#E91E63', { stepped: true })] } });
-    const servoChart   = new Chart(document.getElementById('servoChart'),   { ...steppedConfig('#9C27B0', onOffCb),    data: { labels: chartData.labels, datasets: [makeDataset('Servo State',  chartData.servo,   '#9C27B0', { stepped: true })] } });
+    const buttonChart = new Chart(document.getElementById('buttonChart'), { ...steppedConfig('#FF9800', btnLabelCb), data: { labels: chartData.labels, datasets: [makeDataset('Button State', chartData.button, '#FF9800', { stepped: true })] } });
+    const buzzerChart = new Chart(document.getElementById('buzzerChart'), { ...steppedConfig('#E91E63', onOffCb), data: { labels: chartData.labels, datasets: [makeDataset('Buzzer State', chartData.buzzer, '#E91E63', { stepped: true })] } });
+    const servoChart = new Chart(document.getElementById('servoChart'), { ...steppedConfig('#9C27B0', onOffCb), data: { labels: chartData.labels, datasets: [makeDataset('Servo State', chartData.servo, '#9C27B0', { stepped: true })] } });
 
     const pointOpts = { pointRadius: 4, pointHoverRadius: 6, pointBorderColor: '#fff', pointBorderWidth: 2 };
-    const latitudeChart  = new Chart(document.getElementById('latitudeChart'),  { ...coordConfig(), data: { labels: chartData.labels, datasets: [makeDataset('Latitude',  chartData.latitude,  '#00BCD4', { ...pointOpts, pointBackgroundColor: '#00BCD4' })] } });
-    const longitudeChart = new Chart(document.getElementById('longitudeChart'), { ...coordConfig(), data: { labels: chartData.labels, datasets: [makeDataset('Longitude', chartData.longitude, '#FF5722', { ...pointOpts, pointBackgroundColor: '#FF5722' })] } });
+    const latitudeChart = new Chart(document.getElementById('latitudeChart'), { ...coordConfig('#00BCD4'), data: { labels: chartData.labels, datasets: [makeDataset('Latitude', chartData.latitude, '#00BCD4', { ...pointOpts, pointBackgroundColor: '#00BCD4' })] } });
+    const longitudeChart = new Chart(document.getElementById('longitudeChart'), { ...coordConfig('#FF5722'), data: { labels: chartData.labels, datasets: [makeDataset('Longitude', chartData.longitude, '#FF5722', { ...pointOpts, pointBackgroundColor: '#FF5722' })] } });
   </script>
 
 </body>
